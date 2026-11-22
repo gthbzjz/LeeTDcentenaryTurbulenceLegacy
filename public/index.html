@@ -30,10 +30,33 @@
       </nav>
 
       <div class="header-actions">
-        <div class="lang-switch" role="group" aria-label="Language">
-          <button type="button" data-lang="zh" lang="zh-CN">中文</button>
-          <button type="button" data-lang="en" lang="en">EN</button>
-          <button type="button" data-lang="fr" lang="fr">FR</button>
+        <div class="lang-picker" id="lang-picker">
+          <button type="button" class="lang-trigger" id="lang-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu">
+            <span class="lang-globe" aria-hidden="true">◎</span>
+            <span class="lang-current" id="lang-current">中文</span>
+            <span class="lang-caret" aria-hidden="true"></span>
+          </button>
+          <div class="lang-menu" id="lang-menu" hidden>
+            <p class="lang-menu-label" data-i18n="lang.menu">选择语言</p>
+            <div class="lang-options" role="listbox" aria-label="Language">
+              <button type="button" role="option" data-lang="zh" lang="zh-CN">中文</button>
+              <button type="button" role="option" data-lang="en" lang="en">English</button>
+              <button type="button" role="option" data-lang="fr" lang="fr">Français</button>
+              <button type="button" role="option" data-lang="ru" lang="ru">Русский</button>
+              <button type="button" role="option" data-lang="de" lang="de">Deutsch</button>
+              <button type="button" role="option" data-lang="it" lang="it">Italiano</button>
+              <button type="button" role="option" data-lang="es" lang="es">Español</button>
+              <button type="button" role="option" data-lang="ko" lang="ko">한국어</button>
+              <button type="button" role="option" data-lang="ja" lang="ja">日本語</button>
+              <button type="button" role="option" data-lang="ur" lang="ur">اردو</button>
+              <button type="button" role="option" data-lang="fa" lang="fa">فارسی</button>
+              <button type="button" role="option" data-lang="ar" lang="ar">العربية</button>
+            </div>
+            <form class="lang-custom" id="lang-custom-form" autocomplete="off">
+              <input type="text" id="lang-custom-input" maxlength="40" data-i18n-ph="lang.customPlaceholder" aria-label="Language" />
+              <button type="submit" data-i18n="lang.apply">确定</button>
+            </form>
+          </div>
         </div>
         <a class="btn btn-sm btn-gold nav-cta" href="#register" data-i18n="nav.register">参会注册</a>
         <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Menu">
@@ -94,8 +117,8 @@
           <span data-i18n="stats.registrations">已注册参会者</span>
         </div>
         <div class="stat reveal">
-          <strong>3</strong>
-          <span data-i18n="stats.languages">工作语言</span>
+          <strong>12</strong>
+          <span data-i18n="stats.languages">界面语言</span>
         </div>
       </div>
     </section>
@@ -453,9 +476,21 @@
         <a href="#register" data-i18n="nav.register">参会注册</a>
       </div>
       <div class="footer-lang">
-        <button type="button" data-lang="zh">中文</button>
-        <button type="button" data-lang="en">English</button>
-        <button type="button" data-lang="fr">Français</button>
+        <label for="footer-lang-select" data-i18n="lang.label">语言</label>
+        <select id="footer-lang-select">
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+          <option value="de">Deutsch</option>
+          <option value="it">Italiano</option>
+          <option value="es">Español</option>
+          <option value="ko">한국어</option>
+          <option value="ja">日本語</option>
+          <option value="ur">اردو</option>
+          <option value="fa">فارسی</option>
+          <option value="ar">العربية</option>
+        </select>
       </div>
     </div>
     <div class="container footer-base">

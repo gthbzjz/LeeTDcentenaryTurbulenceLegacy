@@ -4,8 +4,76 @@
   const $ = (selector, root) => (root || document).querySelector(selector);
   const $$ = (selector, root) => Array.from((root || document).querySelectorAll(selector));
 
+  const LANGS = [
+    { code: 'zh', name: '中文', locale: 'zh-CN', dir: 'ltr' },
+    { code: 'en', name: 'English', locale: 'en-GB', dir: 'ltr' },
+    { code: 'fr', name: 'Français', locale: 'fr-FR', dir: 'ltr' },
+    { code: 'ru', name: 'Русский', locale: 'ru-RU', dir: 'ltr' },
+    { code: 'de', name: 'Deutsch', locale: 'de-DE', dir: 'ltr' },
+    { code: 'it', name: 'Italiano', locale: 'it-IT', dir: 'ltr' },
+    { code: 'es', name: 'Español', locale: 'es-ES', dir: 'ltr' },
+    { code: 'ko', name: '한국어', locale: 'ko-KR', dir: 'ltr' },
+    { code: 'ja', name: '日本語', locale: 'ja-JP', dir: 'ltr' },
+    { code: 'ur', name: 'اردو', locale: 'ur-PK', dir: 'rtl' },
+    { code: 'fa', name: 'فارسی', locale: 'fa-IR', dir: 'rtl' },
+    { code: 'ar', name: 'العربية', locale: 'ar', dir: 'rtl' }
+  ];
+
+  const LANG_ALIASES = {
+    zh: 'zh', zho: 'zh', chi: 'zh', chinese: 'zh', mandarin: 'zh', china: 'zh',
+    '中文': 'zh', '汉语': 'zh', '漢語': 'zh', '普通话': 'zh', '简体中文': 'zh', '繁體中文': 'zh',
+    en: 'en', eng: 'en', english: 'en', british: 'en', american: 'en',
+    '英文': 'en', '英语': 'en', '英語': 'en',
+    fr: 'fr', fra: 'fr', fre: 'fr', french: 'fr', francais: 'fr', france: 'fr',
+    ru: 'ru', rus: 'ru', russian: 'ru', 'русский': 'ru', 'россия': 'ru',
+    de: 'de', ger: 'de', deu: 'de', german: 'de', deutsch: 'de', deutschland: 'de',
+    it: 'it', ita: 'it', italian: 'it', italiano: 'it', italia: 'it',
+    es: 'es', spa: 'es', spanish: 'es', espanol: 'es', castellano: 'es', espana: 'es',
+    ko: 'ko', kor: 'ko', korean: 'ko', '한국어': 'ko', '한국말': 'ko', '한국': 'ko',
+    ja: 'ja', jpn: 'ja', japanese: 'ja', '日本語': 'ja', 'にほんご': 'ja', '日本': 'ja',
+    ur: 'ur', urd: 'ur', urdu: 'ur', 'اردو': 'ur', pakistan: 'ur',
+    fa: 'fa', per: 'fa', fas: 'fa', persian: 'fa', farsi: 'fa', 'فارسی': 'fa', 'پارسی': 'fa', iran: 'fa',
+    ar: 'ar', ara: 'ar', arabic: 'ar', 'العربية': 'ar', 'عربي': 'ar', 'عربى': 'ar', arab: 'ar'
+  };
+
+  function normalizeLang(value) {
+    return String(value || '').trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function matchLang(value) {
+    const raw = normalizeLang(value);
+    if (!raw) return '';
+    if (LANG_ALIASES[raw]) return LANG_ALIASES[raw];
+    const base = raw.split(/[-_]/)[0];
+    return LANG_ALIASES[base] || '';
+  }
+
+  function resolveLangInput(value) {
+    const direct = matchLang(value);
+    if (direct) return direct;
+    const words = normalizeLang(value).split(/[\s,;()\/]+/).filter(Boolean);
+    for (let i = 0; i < words.length; i++) {
+      if (LANG_ALIASES[words[i]]) return LANG_ALIASES[words[i]];
+    }
+    return '';
+  }
+
+  function detectLang() {
+    const stored = localStorage.getItem('tdl_lang');
+    if (stored && window.I18N[stored]) return stored;
+    const prefs = (navigator.languages && navigator.languages.length)
+      ? navigator.languages
+      : [navigator.language || ''];
+    for (let i = 0; i < prefs.length; i++) {
+      const code = matchLang(prefs[i]);
+      if (code) return code;
+    }
+    return 'zh';
+  }
+
   const state = {
-    lang: localStorage.getItem('tdl_lang') || 'zh',
+    lang: detectLang(),
     token: localStorage.getItem('tdl_token') || '',
     user: null,
     content: null,
@@ -17,21 +85,24 @@
 
   /* ---------------- i18n ---------------- */
 
+  function langMeta(code) {
+    return LANGS.filter((item) => item.code === code)[0] || LANGS[0];
+  }
+
   function dict() {
-    return window.I18N[state.lang] || window.I18N.zh;
+    return window.I18N[state.lang] || window.I18N.en || window.I18N.zh;
   }
 
   function t(key) {
     const d = dict();
     if (d && d[key] != null) return d[key];
-    if (window.I18N.zh[key] != null) return window.I18N.zh[key];
+    if (window.I18N.en && window.I18N.en[key] != null) return window.I18N.en[key];
+    if (window.I18N.zh && window.I18N.zh[key] != null) return window.I18N.zh[key];
     return key;
   }
 
   function locale() {
-    if (state.lang === 'zh') return 'zh-CN';
-    if (state.lang === 'fr') return 'fr-FR';
-    return 'en-GB';
+    return langMeta(state.lang).locale;
   }
 
   function pick(obj) {
@@ -39,8 +110,23 @@
     return obj[state.lang] || obj.en || obj.zh || obj.fr || '';
   }
 
+  function updateLangControls() {
+    const meta = langMeta(state.lang);
+    $$('[data-lang]').forEach((btn) => {
+      const active = btn.dataset.lang === state.lang;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    const current = $('#lang-current');
+    if (current) current.textContent = meta.name;
+    const footer = $('#footer-lang-select');
+    if (footer) footer.value = state.lang;
+  }
+
   function applyI18n() {
-    document.documentElement.lang = state.lang === 'zh' ? 'zh-CN' : state.lang;
+    const meta = langMeta(state.lang);
+    document.documentElement.lang = meta.locale;
+    document.documentElement.dir = meta.dir;
     $$('[data-i18n]').forEach((el) => {
       const key = el.getAttribute('data-i18n');
       const value = t(key);
@@ -49,17 +135,25 @@
     $$('[data-i18n-ph]').forEach((el) => {
       el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph')));
     });
+    document.title = t('meta.title');
+    updateLangControls();
+  }
+
+  function closeLangMenu() {
+    const menu = $('#lang-menu');
+    const trigger = $('#lang-trigger');
+    if (menu) menu.hidden = true;
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
   }
 
   function setLang(lang) {
-    if (!window.I18N[lang]) return;
+    if (!window.I18N[lang]) return false;
     state.lang = lang;
-    localStorage.setItem('tdl_lang', lang);
-    $$('[data-lang]').forEach((btn) => {
-      btn.classList.toggle('active', btn.dataset.lang === lang);
-    });
+    try { localStorage.setItem('tdl_lang', lang); } catch (e) {}
     applyI18n();
     renderAll();
+    closeLangMenu();
+    return true;
   }
 
   /* ---------------- helpers ---------------- */
@@ -866,9 +960,46 @@
   /* ---------------- bindings ---------------- */
 
   function bind() {
+    const langTrigger = $('#lang-trigger');
+    const langMenu = $('#lang-menu');
+    if (langTrigger && langMenu) {
+      langTrigger.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const open = langMenu.hidden;
+        langMenu.hidden = !open;
+        langTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('#lang-picker')) closeLangMenu();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeLangMenu();
+      });
+    }
+
     $$('[data-lang]').forEach((btn) => {
       btn.addEventListener('click', () => setLang(btn.dataset.lang));
     });
+
+    const footerLang = $('#footer-lang-select');
+    if (footerLang) {
+      footerLang.addEventListener('change', () => setLang(footerLang.value));
+    }
+
+    const langForm = $('#lang-custom-form');
+    if (langForm) {
+      langForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const input = $('#lang-custom-input');
+        const code = resolveLangInput(input ? input.value : '');
+        if (code) {
+          setLang(code);
+          if (input) input.value = '';
+        } else {
+          toast(t('lang.unsupported'));
+        }
+      });
+    }
 
     $$('[data-auth-tab]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -963,7 +1094,6 @@
 
   async function init() {
     applyI18n();
-    $$('[data-lang]').forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === state.lang));
     bind();
     initHeader();
     initFlow();
