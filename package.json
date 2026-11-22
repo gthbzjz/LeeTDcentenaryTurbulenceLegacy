@@ -1,0 +1,13 @@
+{
+  "name": "tdlee100-turbulence-legacy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "T. D. Lee Centennial website for the lecture series on the legacy of his turbulence research",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20 <21"
+  }
+}

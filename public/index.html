@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>T. D. Lee Centennial — Turbulence Legacy Lecture Series</title>
+  <meta name="description" content="T. D. Lee 诞辰一百周年纪念暨湍流研究遗产系列学术报告会 — Centenaire de T. D. Lee : série de conférences sur l’héritage de ses recherches sur la turbulence." />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header id="site-header">
+    <div class="header-inner container">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">李</span>
+        <span class="brand-text">
+          <strong data-i18n="brand.title">李政道百年</strong>
+          <small data-i18n="brand.sub">湍流研究遗产系列</small>
+        </span>
+      </a>
+
+      <nav id="primary-nav" aria-label="Primary">
+        <a href="#legacy" data-i18n="nav.legacy">学术遗产</a>
+        <a href="#program" data-i18n="nav.program">学术报告</a>
+        <a href="#materials" data-i18n="nav.materials">报告材料</a>
+        <a href="#forum" data-i18n="nav.forum">线上交流</a>
+        <a href="#committees" data-i18n="nav.committees">组织架构</a>
+        <a href="#admin" id="nav-admin" data-i18n="nav.admin" hidden>管理后台</a>
+      </nav>
+
+      <div class="header-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" data-lang="zh" lang="zh-CN">中文</button>
+          <button type="button" data-lang="en" lang="en">EN</button>
+          <button type="button" data-lang="fr" lang="fr">FR</button>
+        </div>
+        <a class="btn btn-sm btn-gold nav-cta" href="#register" data-i18n="nav.register">参会注册</a>
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section id="top" class="hero">
+      <canvas id="flow-canvas" aria-hidden="true"></canvas>
+      <div class="hero-veil" aria-hidden="true"></div>
+
+      <div class="hero-inner container">
+        <p class="hero-kicker">
+          <span class="hairline"></span>
+          <span data-i18n="hero.kicker">1926 — 2026 · 诞辰一百周年</span>
+          <span class="hairline"></span>
+        </p>
+        <h1 class="hero-title">
+          <span data-i18n="hero.title1">李政道与</span>
+          <span data-i18n="hero.title2">湍流的统计遗产</span>
+        </h1>
+        <p class="hero-series" data-i18n="hero.series">纪念李政道诞辰一百周年 · 湍流研究遗产系列学术报告会</p>
+        <p class="hero-dates" data-i18n="hero.dates">2026 年 11 月 24 日开幕 · 跨年度系列报告与研讨</p>
+        <div class="hero-actions">
+          <a class="btn btn-gold" href="#register" data-i18n="hero.cta1">报名参会</a>
+          <a class="btn btn-outline" href="#program" data-i18n="hero.cta2">查看报告日程</a>
+        </div>
+      </div>
+
+      <blockquote class="hero-quote container">
+        <p data-i18n="hero.quote">“Statistical physics, both quantum and classical, had been a long-term interest of T. D. Lee, along with symmetry, parity conservation, many-body theory and renormalized perturbation expansions.”</p>
+        <cite data-i18n="hero.cite">T. D. Lee, <em>Quart. Appl. Math.</em> 10, 69–73 (1952)</cite>
+      </blockquote>
+
+      <div class="hero-scroll" aria-hidden="true">
+        <span data-i18n="hero.scroll">向下浏览</span>
+        <span class="scroll-line"></span>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-band" aria-label="Key figures">
+      <div class="container stats-grid">
+        <div class="stat reveal">
+          <strong>1952</strong>
+          <span data-i18n="stats.paper">论文发表年份</span>
+        </div>
+        <div class="stat reveal">
+          <strong>367<sup>+</sup></strong>
+          <span data-i18n="stats.citations">Google Scholar 引用</span>
+        </div>
+        <div class="stat reveal">
+          <strong id="stat-registrations">0</strong>
+          <span data-i18n="stats.registrations">已注册参会者</span>
+        </div>
+        <div class="stat reveal">
+          <strong>3</strong>
+          <span data-i18n="stats.languages">工作语言</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Legacy -->
+    <section id="legacy" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-index">01</span>
+          <div>
+            <p class="section-eyebrow" data-i18n="legacy.eyebrow">学术遗产</p>
+            <h2 data-i18n="legacy.title">从统计物理到湍流</h2>
+          </div>
+        </div>
+
+        <div class="legacy-grid">
+          <div class="legacy-text">
+            <p class="lead reveal" data-i18n="legacy.lead">统计物理——量子的与经典的——是李政道先生长期关注的领域，与对称性、宇称守恒、多体理论和重整化微扰展开并列。</p>
+            <p class="reveal" data-i18n="legacy.p1">1952 年，他在《应用数学季刊》发表《论流体与磁流体场的若干统计性质》，把统计力学的语言带入湍流与磁流体湍流的研究，为理解场的统计不变量、能谱与间歇性提供了持久的思想资源。</p>
+            <p class="reveal" data-i18n="legacy.p2">据 Google Scholar 统计，该文已被直接引用三百余次；而受其影响却未直接引用的工作，无疑更多。本次系列学术报告会旨在重访这一遗产，并把它与当代湍流理论、磁流体力学和天体物理的前沿问题连接起来。</p>
+
+            <blockquote class="paper-quote reveal">
+              <p>On some statistical properties of hydrodynamical and magneto-hydrodynamical fields</p>
+              <cite>Quart. Appl. Math. <strong>10</strong>, 69–73 (1952)</cite>
+            </blockquote>
+          </div>
+
+          <aside class="legacy-aside reveal">
+            <figure class="flow-figure" aria-hidden="true">
+              <svg viewBox="0 0 320 320" role="presentation">
+                <defs>
+                  <linearGradient id="fg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#d9bd7d" />
+                    <stop offset="1" stop-color="#8d6a2a" />
+                  </linearGradient>
+                </defs>
+                <g fill="none" stroke="url(#fg)" stroke-width="1">
+                  <path d="M10 60 C 70 20, 120 100, 180 60 S 260 10, 310 60" />
+                  <path d="M10 100 C 70 60, 120 140, 180 100 S 260 50, 310 100" opacity=".85" />
+                  <path d="M10 140 C 70 100, 120 180, 180 140 S 260 90, 310 140" opacity=".7" />
+                  <path d="M10 180 C 70 140, 120 220, 180 180 S 260 130, 310 180" opacity=".55" />
+                  <path d="M10 220 C 70 180, 120 260, 180 220 S 260 170, 310 220" opacity=".4" />
+                  <path d="M10 260 C 70 220, 120 300, 180 260 S 260 210, 310 260" opacity=".28" />
+                  <circle cx="180" cy="140" r="3.5" fill="#b8933f" stroke="none" />
+                  <circle cx="100" cy="92" r="2" fill="#b8933f" stroke="none" />
+                  <circle cx="250" cy="200" r="2" fill="#b8933f" stroke="none" />
+                </g>
+              </svg>
+            </figure>
+            <div class="aside-card">
+              <span class="aside-label" data-i18n="legacy.asideLabel">本系列</span>
+              <h3 data-i18n="legacy.asideTitle">重访一篇论文的生命</h3>
+              <p data-i18n="legacy.asideText">以报告、讲义、录像与讨论，追踪一个统计思想如何在七十余年后仍塑造我们对湍流的理解。</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- Program / announcements -->
+    <section id="program" class="section section-alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-index">02</span>
+          <div>
+            <p class="section-eyebrow" data-i18n="program.eyebrow">学术报告</p>
+            <h2 data-i18n="program.title">报告日程与通知</h2>
+            <p class="section-sub" data-i18n="program.sub">系列报告、研讨活动与重要通知将在此陆续发布。</p>
+          </div>
+        </div>
+        <div id="announcement-list" class="timeline"></div>
+      </div>
+    </section>
+
+    <!-- Materials -->
+    <section id="materials" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-index">03</span>
+          <div>
+            <p class="section-eyebrow" data-i18n="materials.eyebrow">报告材料</p>
+            <h2 data-i18n="materials.title">幻灯片、录像与论文</h2>
+            <p class="section-sub" data-i18n="materials.sub">会议报告材料将在此归档，供与会者与学界长期查阅。</p>
+          </div>
+        </div>
+        <div id="material-grid" class="material-grid"></div>
+      </div>
+    </section>
+
+    <!-- Forum -->
+    <section id="forum" class="section section-alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-index">04</span>
+          <div>
+            <p class="section-eyebrow" data-i18n="forum.eyebrow">线上交流</p>
+            <h2 data-i18n="forum.title">会前与会后的讨论</h2>
+            <p class="section-sub" data-i18n="forum.sub">注册参会者可在会前提问、会后延续讨论。</p>
+          </div>
+        </div>
+
+        <div class="forum-shell">
+          <div id="forum-composer" class="forum-composer"></div>
+          <div id="forum-list" class="forum-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Committees -->
+    <section id="committees" class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-index">05</span>
+          <div>
+            <p class="section-eyebrow" data-i18n="committees.eyebrow">组织架构</p>
+            <h2 data-i18n="committees.title">顾问、组织与举办单位</h2>
+            <p class="section-sub" data-i18n="committees.sub">名单由会议秘书处维护，并将在确认后持续更新。</p>
+          </div>
+        </div>
+        <div id="committee-grid" class="committee-grid"></div>
+      </div>
+    </section>
+
+    <!-- Registration -->
+    <section id="register" class="section section-ink">
+      <div class="container">
+        <div class="section-head light reveal">
+          <span class="section-index">06</span>
+          <div>
+            <p class="section-eyebrow" data-i18n="register.eyebrow">参会注册</p>
+            <h2 data-i18n="register.title">加入这场跨越百年的讨论</h2>
+            <p class="section-sub" data-i18n="register.sub">注册后即可发布交流帖、接收会议通知并获取报告材料。</p>
+          </div>
+        </div>
+
+        <div class="register-grid">
+          <div class="register-intro reveal">
+            <h3 data-i18n="register.introTitle">注册须知</h3>
+            <ul class="register-points">
+              <li data-i18n="register.point1">本系列报告会面向湍流、统计物理及相关领域的研究者与研究生开放。</li>
+              <li data-i18n="register.point2">线上注册即刻生效，可随时在交流区参与讨论。</li>
+              <li data-i18n="register.point3">报告材料将在会后统一归档，注册参会者可优先获取。</li>
+              <li data-i18n="register.point4">如需邀请函或补充说明，请联系会议秘书处。</li>
+            </ul>
+            <div class="register-stats">
+              <div>
+                <strong id="stat-registrations-2">0</strong>
+                <span data-i18n="register.countLabel">位注册参会者</span>
+              </div>
+              <div>
+                <strong id="stat-forum">0</strong>
+                <span data-i18n="register.discussLabel">条交流发言</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="auth-card reveal">
+            <div class="auth-tabs" role="tablist">
+              <button type="button" class="auth-tab active" data-auth-tab="register" data-i18n="auth.tabRegister">注册报名</button>
+              <button type="button" class="auth-tab" data-auth-tab="login" data-i18n="auth.tabLogin">已有账号登录</button>
+            </div>
+
+            <form id="register-form" class="auth-form" novalidate>
+              <div class="field-row">
+                <label class="field">
+                  <span data-i18n="auth.name">姓名</span>
+                  <input name="name" type="text" autocomplete="name" required maxlength="80" />
+                </label>
+                <label class="field">
+                  <span data-i18n="auth.email">邮箱</span>
+                  <input name="email" type="email" autocomplete="email" required maxlength="160" />
+                </label>
+              </div>
+              <div class="field-row">
+                <label class="field">
+                  <span data-i18n="auth.password">密码</span>
+                  <input name="password" type="password" autocomplete="new-password" required minlength="6" />
+                </label>
+                <label class="field">
+                  <span data-i18n="auth.affiliation">所在单位</span>
+                  <input name="affiliation" type="text" maxlength="160" />
+                </label>
+              </div>
+              <div class="field-row">
+                <label class="field">
+                  <span data-i18n="auth.position">职称 / 职务</span>
+                  <input name="position" type="text" maxlength="120" />
+                </label>
+                <label class="field">
+                  <span data-i18n="auth.country">国家 / 地区</span>
+                  <input name="country" type="text" maxlength="80" />
+                </label>
+              </div>
+              <label class="field">
+                <span data-i18n="auth.notes">备注（可选）</span>
+                <textarea name="notes" rows="3" maxlength="500" data-i18n-ph="auth.notesPlaceholder"></textarea>
+              </label>
+              <p class="form-error" id="register-error" hidden></p>
+              <button class="btn btn-gold btn-block" type="submit" data-i18n="auth.submitRegister">提交注册</button>
+            </form>
+
+            <form id="login-form" class="auth-form" novalidate hidden>
+              <label class="field">
+                <span data-i18n="auth.email">邮箱</span>
+                <input name="email" type="email" autocomplete="email" required maxlength="160" />
+              </label>
+              <label class="field">
+                <span data-i18n="auth.password">密码</span>
+                <input name="password" type="password" autocomplete="current-password" required />
+              </label>
+              <p class="form-error" id="login-error" hidden></p>
+              <button class="btn btn-gold btn-block" type="submit" data-i18n="auth.submitLogin">登录</button>
+            </form>
+
+            <div id="account-panel" class="account-panel" hidden>
+              <p class="account-label" data-i18n="auth.signedInAs">已登录</p>
+              <h3 id="account-name"></h3>
+              <p id="account-meta" class="account-meta"></p>
+              <div class="account-actions">
+                <a class="btn btn-outline-dark" href="#forum" data-i18n="auth.goForum">前往交流区</a>
+                <button type="button" class="btn btn-outline-dark" id="logout-btn" data-i18n="auth.logout">退出登录</button>
+              </div>
+              <p class="account-admin" id="account-admin" hidden>
+                <a href="#admin" data-i18n="auth.adminHint">进入管理后台</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin -->
+    <section id="admin" class="section admin-section" hidden>
+      <div class="container">
+        <div class="section-head">
+          <span class="section-index">07</span>
+          <div>
+            <p class="section-eyebrow" data-i18n="admin.eyebrow">管理后台</p>
+            <h2 data-i18n="admin.title">内容与名单维护</h2>
+            <p class="section-sub" data-i18n="admin.sub">发布通知、归档报告材料、维护组织名单与查看报名情况。</p>
+          </div>
+        </div>
+
+        <div class="admin-tabs" role="tablist">
+          <button type="button" class="admin-tab active" data-admin-tab="announcements" data-i18n="admin.tabAnnouncements">通知管理</button>
+          <button type="button" class="admin-tab" data-admin-tab="materials" data-i18n="admin.tabMaterials">材料管理</button>
+          <button type="button" class="admin-tab" data-admin-tab="committees" data-i18n="admin.tabCommittees">名单管理</button>
+          <button type="button" class="admin-tab" data-admin-tab="registrations" data-i18n="admin.tabRegistrations">报名名单</button>
+        </div>
+
+        <div class="admin-panel" data-admin-panel="announcements">
+          <form id="announcement-form" class="admin-form">
+            <div class="field-row">
+              <label class="field">
+                <span data-i18n="admin.date">日期</span>
+                <input type="date" name="date" required />
+              </label>
+              <label class="field">
+                <span data-i18n="admin.tag">类别</span>
+                <select name="tag">
+                  <option value="opening" data-i18n="tag.opening">开幕</option>
+                  <option value="notice" data-i18n="tag.notice">通知</option>
+                  <option value="seminar" data-i18n="tag.seminar">研讨</option>
+                </select>
+              </label>
+            </div>
+            <div class="lang-fields">
+              <label class="field"><span>中文标题</span><input name="title-zh" type="text" maxlength="200" /></label>
+              <label class="field"><span>English title</span><input name="title-en" type="text" maxlength="200" /></label>
+              <label class="field"><span>Titre français</span><input name="title-fr" type="text" maxlength="200" /></label>
+            </div>
+            <div class="lang-fields">
+              <label class="field"><span>中文正文</span><textarea name="body-zh" rows="3" maxlength="2000"></textarea></label>
+              <label class="field"><span>English body</span><textarea name="body-en" rows="3" maxlength="2000"></textarea></label>
+              <label class="field"><span>Texte français</span><textarea name="body-fr" rows="3" maxlength="2000"></textarea></label>
+            </div>
+            <button class="btn btn-gold" type="submit" data-i18n="admin.publishAnnouncement">发布通知</button>
+          </form>
+          <div id="admin-announcement-list" class="admin-list"></div>
+        </div>
+
+        <div class="admin-panel" data-admin-panel="materials" hidden>
+          <form id="material-form" class="admin-form">
+            <div class="field-row">
+              <label class="field">
+                <span data-i18n="admin.materialType">类型</span>
+                <select name="type">
+                  <option value="slides" data-i18n="materials.typeSlides">幻灯片</option>
+                  <option value="video" data-i18n="materials.typeVideo">视频</option>
+                  <option value="paper" data-i18n="materials.typePaper">论文</option>
+                </select>
+              </label>
+              <label class="field">
+                <span data-i18n="admin.speaker">报告人</span>
+                <input name="speaker" type="text" maxlength="120" />
+              </label>
+              <label class="field">
+                <span data-i18n="admin.date">日期</span>
+                <input name="date" type="text" maxlength="20" placeholder="2026-11-24" />
+              </label>
+              <label class="field">
+                <span data-i18n="admin.link">链接</span>
+                <input name="url" type="url" maxlength="500" placeholder="https://" />
+              </label>
+            </div>
+            <div class="lang-fields">
+              <label class="field"><span>中文标题</span><input name="title-zh" type="text" maxlength="200" /></label>
+              <label class="field"><span>English title</span><input name="title-en" type="text" maxlength="200" /></label>
+              <label class="field"><span>Titre français</span><input name="title-fr" type="text" maxlength="200" /></label>
+            </div>
+            <button class="btn btn-gold" type="submit" data-i18n="admin.addMaterial">添加材料</button>
+          </form>
+          <div id="admin-material-list" class="admin-list"></div>
+        </div>
+
+        <div class="admin-panel" data-admin-panel="committees" hidden>
+          <p class="admin-hint" data-i18n="admin.committeeHint">名单修改会立即保存并显示在公开页面。</p>
+          <div id="admin-committee-editor" class="committee-editor"></div>
+        </div>
+
+        <div class="admin-panel" data-admin-panel="registrations" hidden>
+          <div class="table-wrap">
+            <table class="registrations-table">
+              <thead>
+                <tr>
+                  <th data-i18n="admin.colName">姓名</th>
+                  <th data-i18n="admin.colEmail">邮箱</th>
+                  <th data-i18n="admin.colAffiliation">单位</th>
+                  <th data-i18n="admin.colPosition">职称 / 职务</th>
+                  <th data-i18n="admin.colCountry">国家 / 地区</th>
+                  <th data-i18n="admin.colDate">注册时间</th>
+                </tr>
+              </thead>
+              <tbody id="registrations-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <span class="brand-mark small" aria-hidden="true">李</span>
+        <div>
+          <strong data-i18n="footer.title">李政道诞辰一百周年 · 湍流研究遗产系列学术报告会</strong>
+          <p data-i18n="footer.sub">开源的学术纪念网站 · 由会议秘书处维护</p>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="#legacy" data-i18n="nav.legacy">学术遗产</a>
+        <a href="#program" data-i18n="nav.program">学术报告</a>
+        <a href="#materials" data-i18n="nav.materials">报告材料</a>
+        <a href="#register" data-i18n="nav.register">参会注册</a>
+      </div>
+      <div class="footer-lang">
+        <button type="button" data-lang="zh">中文</button>
+        <button type="button" data-lang="en">English</button>
+        <button type="button" data-lang="fr">Français</button>
+      </div>
+    </div>
+    <div class="container footer-base">
+      <p data-i18n="footer.quote">“在湍流中，统计的秩序隐而不显，却从未缺席。”</p>
+      <p class="footer-year">1926 — 2026</p>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/i18n.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
