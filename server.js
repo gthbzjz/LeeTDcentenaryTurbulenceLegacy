@@ -48,6 +48,21 @@ function verifyPassword(password, salt, expected) {
   return actual.length === expectedBuf.length && crypto.timingSafeEqual(actual, expectedBuf);
 }
 
+const SERIES_RANGE_LABELS = {
+  zh: '至活动结束',
+  en: 'until the end of the series',
+  fr: 'jusqu’à la fin de la série',
+  ru: 'до конца серии',
+  de: 'bis zum Ende der Reihe',
+  it: 'fino al termine del ciclo',
+  es: 'hasta el final del ciclo',
+  ko: '행사 종료 시까지',
+  ja: 'シリーズ終了まで',
+  ur: 'سلسلے کے اختتام تک',
+  fa: 'تا پایان مجموعه',
+  ar: 'حتى نهاية السلسلة'
+};
+
 function seedState() {
   const salt = crypto.randomBytes(16).toString('hex');
   const now = new Date().toISOString();
@@ -70,7 +85,7 @@ function seedState() {
     announcements: [
       {
         id: crypto.randomUUID(),
-        date: '2026-11-24',
+        date: '2026-11-25',
         tag: 'opening',
         title: {
           zh: '开幕报告：湍流统计理论的起源与回响',
@@ -86,7 +101,8 @@ function seedState() {
       },
       {
         id: crypto.randomUUID(),
-        date: '2026-12-12',
+        date: '2026-11-24',
+        dateLabel: { ...SERIES_RANGE_LABELS },
         tag: 'notice',
         title: {
           zh: '参会注册与报告征稿正式开放',
@@ -192,6 +208,26 @@ function loadState() {
       throw new Error('invalid state');
     }
     state = parsed;
+    let migrated = false;
+    const opening = state.announcements.find((item) => item.title && item.title.zh === '开幕报告：湍流统计理论的起源与回响');
+    if (opening && opening.date !== '2026-11-25') {
+      opening.date = '2026-11-25';
+      migrated = true;
+    }
+    const registration = state.announcements.find((item) => item.title && item.title.zh === '参会注册与报告征稿正式开放');
+    if (registration) {
+      if (registration.date !== '2026-11-24') {
+        registration.date = '2026-11-24';
+        migrated = true;
+      }
+      const labels = registration.dateLabel || {};
+      const labelsNeedUpdate = Object.keys(SERIES_RANGE_LABELS).some((lang) => labels[lang] !== SERIES_RANGE_LABELS[lang]);
+      if (labelsNeedUpdate) {
+        registration.dateLabel = { ...SERIES_RANGE_LABELS };
+        migrated = true;
+      }
+    }
+    if (migrated) persist();
   } catch {
     state = seedState();
     persist();

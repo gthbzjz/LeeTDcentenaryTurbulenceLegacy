@@ -267,6 +267,7 @@
       const day = d ? String(d.getDate()).padStart(2, '0') : '—';
       const mon = d ? new Intl.DateTimeFormat(locale(), { month: 'short' }).format(d).toUpperCase() : '';
       const year = d ? d.getFullYear() : '';
+      const rangeNote = item.dateLabel ? pick(item.dateLabel) : '';
       const title = pick(item.title);
       const body = pick(item.body);
       return (
@@ -275,6 +276,7 @@
             '<span class="t-day">' + esc(day) + '</span>' +
             '<span class="t-mon">' + esc(mon) + '</span>' +
             '<span class="t-year">' + esc(year) + '</span>' +
+            (rangeNote ? '<span class="t-note">' + esc(rangeNote) + '</span>' : '') +
           '</div>' +
           '<div class="timeline-body">' +
             '<span class="tag-pill tag-' + esc(item.tag) + '">' + esc(t('tag.' + item.tag)) + '</span>' +

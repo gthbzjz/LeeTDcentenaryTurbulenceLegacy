@@ -859,6 +859,14 @@ button {
   color: var(--muted);
 }
 
+.t-note {
+  max-width: 112px;
+  margin-top: 8px;
+  font-size: 0.66rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .timeline-body .tag-pill {
   margin-bottom: 12px;
 }
