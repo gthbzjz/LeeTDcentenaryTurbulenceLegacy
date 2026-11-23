@@ -130,6 +130,7 @@ window.I18N = {
     'tag.opening': '开幕',
     'tag.notice': '通知',
     'tag.seminar': '研讨',
+    'tag.lecture': '报告',
 
     'footer.title': '李政道诞辰一百周年 · 湍流研究遗产系列学术报告会',
     'footer.sub': '学术纪念网站 · 由会议秘书处维护',
@@ -286,6 +287,7 @@ window.I18N = {
     'tag.opening': 'Opening',
     'tag.notice': 'Notice',
     'tag.seminar': 'Seminar',
+    'tag.lecture': 'Lecture',
 
     'footer.title': 'T. D. Lee Centennial · Turbulence Legacy Lecture Series',
     'footer.sub': 'An academic commemorative site maintained by the secretariat',
@@ -442,6 +444,7 @@ window.I18N = {
     'tag.opening': 'Inauguration',
     'tag.notice': 'Annonce',
     'tag.seminar': 'Séminaire',
+    'tag.lecture': 'Conférence',
 
     'footer.title': 'Centenaire de T. D. Lee · Série de conférences sur l’héritage de la turbulence',
     'footer.sub': 'Un site commémoratif académique tenu par le secrétariat',
@@ -600,6 +603,7 @@ Object.assign(window.I18N, {
     'tag.opening': 'Открытие',
     'tag.notice': 'Объявление',
     'tag.seminar': 'Семинар',
+    'tag.lecture': 'Лекция',
 
     'footer.title': 'Столетие Т. Д. Ли · Серия лекций о наследии турбулентности',
     'footer.sub': 'Научный памятный сайт, поддерживаемый секретариатом',
@@ -756,6 +760,7 @@ Object.assign(window.I18N, {
     'tag.opening': 'Eröffnung',
     'tag.notice': 'Ankündigung',
     'tag.seminar': 'Seminar',
+    'tag.lecture': 'Vortrag',
 
     'footer.title': '100. Geburtstag von T. D. Lee · Vortragsreihe zum Vermächtnis der Turbulenz',
     'footer.sub': 'Eine akademische Gedenkseite, gepflegt vom Sekretariat',
@@ -912,6 +917,7 @@ Object.assign(window.I18N, {
     'tag.opening': 'Apertura',
     'tag.notice': 'Avviso',
     'tag.seminar': 'Seminario',
+    'tag.lecture': 'Conferenza',
 
     'footer.title': 'Centenario di T. D. Lee · Ciclo di conferenze sull’eredità della turbolenza',
     'footer.sub': 'Un sito commemorativo accademico curato dal segretariato',
@@ -1068,6 +1074,7 @@ Object.assign(window.I18N, {
     'tag.opening': 'Inauguración',
     'tag.notice': 'Aviso',
     'tag.seminar': 'Seminario',
+    'tag.lecture': 'Conferencia',
 
     'footer.title': 'Centenario de T. D. Lee · Ciclo de conferencias sobre el legado de la turbulencia',
     'footer.sub': 'Un sitio conmemorativo académico mantenido por la secretaría',
@@ -1226,6 +1233,7 @@ Object.assign(window.I18N, {
     'tag.opening': '개막',
     'tag.notice': '공지',
     'tag.seminar': '세미나',
+    'tag.lecture': '강연',
 
     'footer.title': 'T. D. 리 탄생 100주년 · 난류 연구 유산 강연 시리즈',
     'footer.sub': '학술 기념 사이트 · 사무국 관리',
@@ -1382,6 +1390,7 @@ Object.assign(window.I18N, {
     'tag.opening': '開幕',
     'tag.notice': 'お知らせ',
     'tag.seminar': 'セミナー',
+    'tag.lecture': '講演',
 
     'footer.title': 'T. D. Lee 生誕100周年 · 乱流研究の遺産シリーズ',
     'footer.sub': '学術記念サイト · 事務局運営',
@@ -1538,6 +1547,7 @@ Object.assign(window.I18N, {
     'tag.opening': 'افتتاح',
     'tag.notice': 'اطلاع',
     'tag.seminar': 'سیمینار',
+    'tag.lecture': 'لیکچر',
 
     'footer.title': 'ٹی ڈی لی صد سالہ · طغیانی تحقیق کے ورثے کی لیکچر سیریز',
     'footer.sub': 'علمی یادگار ویب سائٹ · سیکرٹریٹ کے زیرِ انتظام',
@@ -1694,6 +1704,7 @@ Object.assign(window.I18N, {
     'tag.opening': 'افتتاحیه',
     'tag.notice': 'اطلاعیه',
     'tag.seminar': 'سمینار',
+    'tag.lecture': 'سخنرانی',
 
     'footer.title': 'صدمین سالگرد تی. دی. لی · مجموعه سخنرانی میراث پژوهش آشفتگی',
     'footer.sub': 'وب‌سایت یادبود علمی · نگهداری دبیرخانه',
@@ -1850,6 +1861,7 @@ Object.assign(window.I18N, {
     'tag.opening': 'الافتتاح',
     'tag.notice': 'إعلان',
     'tag.seminar': 'ندوة',
+    'tag.lecture': 'محاضرة',
 
     'footer.title': 'مئوية تي. دي. لي · سلسلة محاضرات تراث أبحاث الاضطراب',
     'footer.sub': 'موقع تذكاري أكاديمي تديره الأمانة العامة',

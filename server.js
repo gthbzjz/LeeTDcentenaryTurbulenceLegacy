@@ -105,9 +105,18 @@ function seedState() {
         dateLabel: { ...SERIES_RANGE_LABELS },
         tag: 'notice',
         title: {
-          zh: '参会注册与报告征稿正式开放',
-          en: 'Registration and Call for Contributions Now Open',
-          fr: 'Ouverture des inscriptions et de l’appel à contributions'
+          zh: '参会注册与报告征稿正式开放，揭幕',
+          en: 'Registration and Call for Contributions Now Open — Kickoff',
+          fr: 'Ouverture des inscriptions et de l’appel à contributions — Lancement',
+          ru: 'Регистрация и приём тезисов открыты — старт',
+          de: 'Anmeldung und Beitragseinreichung geöffnet — Auftakt',
+          it: 'Iscrizione e call for contributions aperti — avvio',
+          es: 'Inscripción y llamada a contribuciones abiertas — lanzamiento',
+          ko: '등록 및 발표 신청 공식 오픈 — 킥오프',
+          ja: '参加登録と報告募集正式開始——キックオフ',
+          ur: 'رجسٹریشن اور تقاریر کی دعوت رسمی طور پر کھل گئی',
+          fa: 'ثبت‌نام و فراخوان مقالات رسماً آغاز شد',
+          ar: 'التسجيل ودعوة المساهمات مفتوحة رسميًا — انطلاق'
         },
         body: {
           zh: '即日起开放线上注册。欢迎从事湍流、统计物理与相关领域的学者报名参会，并提交拟报告题目与摘要。注册后将获得线上交流区权限。',
@@ -118,17 +127,35 @@ function seedState() {
       },
       {
         id: crypto.randomUUID(),
-        date: '2027-01-15',
-        tag: 'seminar',
+        date: '2026-11-25',
+        tag: 'lecture',
         title: {
-          zh: '系列研讨会（一）：磁流体湍流的统计性质',
-          en: 'Seminar I: Statistical Properties of Magnetohydrodynamic Turbulence',
-          fr: 'Séminaire I : propriétés statistiques de la turbulence magnétohydrodynamique'
+          zh: 'QED 与 QCD 湍流中的统计方法——李政道 1952 年遗产',
+          en: 'Statistical Methods in QED and QCD Turbulence: The Legacy of T. D. Lee’s 1952 Paper',
+          fr: 'Méthodes statistiques dans la turbulence QED et QCD : l’héritage de l’article de 1952 de T. D. Lee',
+          ru: 'Статистические методы в турбулентности КЭД и КХД: наследие работы Т. Д. Ли 1952 года',
+          de: 'Statistische Methoden in der QED- und QCD-Turbulenz: Das Vermächtnis von T. D. Lees Arbeit von 1952',
+          it: 'Metodi statistici nella turbolenza QED e QCD: l’eredità dell’articolo di T. D. Lee del 1952',
+          es: 'Métodos estadísticos en la turbulencia QED y QCD: el legado del artículo de 1952 de T. D. Lee',
+          ko: 'QED 및 QCD 난류의 통계적 방법 — T. D. Lee 1952년 논문의 유산',
+          ja: 'QED と QCD 乱流における統計的手法——李政道 1952 年の遺産',
+          ur: 'QED اور QCD ٹربولنس میں شماریاتی طریقے: ٹی ڈی لی کے 1952 کے مقالے کا ورثہ',
+          fa: 'روش‌های آماری در تلاطم QED و QCD: میراث مقاله ۱۹۵۲ تی. دی. لی',
+          ar: 'الأساليب الإحصائية في اضطراب QED و QCD: إرث ورقة تي. دي. لي لعام 1952'
         },
         body: {
-          zh: '本次研讨会聚焦磁流体湍流中的统计不变量、能谱与间歇性，并讨论李政道 1952 年工作在现代磁流体与天体物理湍流研究中的延续。报告材料将于会后在本站发布。',
-          en: 'This seminar focuses on statistical invariants, energy spectra and intermittency in magnetohydrodynamic turbulence, and on how Lee’s 1952 work continues in modern MHD and astrophysical turbulence research. Slides and recordings will be posted here after the seminar.',
-          fr: 'Ce séminaire porte sur les invariants statistiques, les spectres d’énergie et l’intermittence dans la turbulence magnétohydrodynamique, ainsi que sur la postérité de l’article de 1952 de Lee dans la recherche moderne en MHD et en turbulence astrophysique. Les supports seront publiés ici après le séminaire.'
+          zh: '1993 年关于 QED 湍流的论文引用了李政道 1952 年的工作——Dirac 方程与 Maxwell 方程耦合系统具有若干理想不变量，Lee 的统计方法为研究提供了新路径。这一思路避开了重整化微扰理论的固有困难，原则上可推广至 QCD 和夸克-胶子等离子体的统计研究。1997 年的后续论文亦隐式延续了这一方向。',
+          en: 'A 1993 paper on QED turbulence cited Lee 1952: the coupled Dirac–Maxwell system possesses several ideal invariants, and Lee’s statistical approach opens a fresh avenue of investigation. This framework sidesteps the inherent difficulties of renormalized perturbation theory and can in principle be extended to QCD and the quark–gluon plasma. A 1997 follow-up paper implicitly carried forward this direction.',
+          fr: 'Un article de 1993 sur la turbulence QED citait Lee 1952 : le système couplé Dirac–Maxwell possède plusieurs invariants idéaux, et l’approche statistique de Lee ouvre une nouvelle voie d’investigation. Ce cadre contourne les difficultés inhérentes à la théorie des perturbations renormalisée et peut en principe être étendu à la QCD et au plasma quark–gluon. Un article de suivi de 1997 a implicitement poursuivi cette direction.',
+          ru: 'Статья 1993 года о турбулентности КЭД цитировала работу Ли 1952 года: связанная система Дирака–Максвелла обладает несколькими идеальными инвариантами, а статистический подход Ли открывает новый путь исследования. Эта структура обходит присущие теории возмущений с перенормировкой трудности и в принципе может быть распространена на КХД и кварк-глюонную плазму. Последующая статья 1997 года имплицитно продолжила это направление.',
+          de: 'Ein Aufsatz von 1993 über QED-Turbulenz zitierte Lee 1952: das gekoppelte Dirac–Maxwell-System besitzt mehrere ideale Invarianten, und Lees statistischer Ansatz eröffnet einen neuen Untersuchungsweg. Dieser Rahmen umgeht die inhärenten Schwierigkeiten der renormierten Störungstheorie und lässt sich prinzipiell auf die QCD und das Quark-Gluon-Plasma erweitern. Ein Folgeaufsatz von 1997 setzte diese Richtung implizit fort.',
+          it: 'Un articolo del 1993 sulla turbolenza QED citava Lee 1952: il sistema accoppiato Dirac–Maxwell possiede diversi invarianti ideali, e l’approccio statistico di Lee apre una nuova via di indagine. Questo quadro aggira le difficoltà inerenti alla teoria delle perturbazioni rinormalizzata e può in principio essere esteso alla QCD e al plasma di quark–gluoni. Un articolo di follow-up del 1997 ha implicitamente proseguito questa direzione.',
+          es: 'Un artículo de 1993 sobre turbulencia QED citaba a Lee 1952: el sistema acoplado Dirac–Maxwell posee varios invariantes ideales, y el enfoque estadístico de Lee abre una nueva vía de investigación. Este marco evita las dificultades inherentes a la teoría de perturbaciones renormalizada y, en principio, puede extenderse a la QCD y al plasma de quark–gluones. Un artículo de seguimiento de 1997 continuó implícitamente esta dirección.',
+          ko: 'QED 난류에 관한 1993년 논문은 Lee 1952를 인용했습니다. Dirac–Maxwell 결합 시스템은 이상 불변량을 가지며 Lee의 통계적 접근법은 새로운 연구 방향을 제시합니다. 이 틀은 재규제 섭동 이론의 고유한 어려움을 피하고 원칙적으로 QCD 및 쿼크-글루온 플라즈마로 확장될 수 있습니다. 1997년 후속 논문은 이 방향을 암묵적으로 이어갔습니다.',
+          ja: 'QED 乱流に関する 1993 年の論文は Lee 1952 を引用しました。Dirac–Maxwell 結合系はいくつかの理想不変量を持ち、Lee の統計的アプローチは新しい研究経路を開きます。この枠組みは繰り込み摂動論の固有の困難さを回避し、原理的に QCD およびクォーク・グルオンプラズマに拡張できます。1997 年の追論文はこの方向を暗黙的に継承しています。',
+          ur: 'QED ٹربولنس پر 1993 کے مقالے نے Lee 1952 کو حوالہ دیا۔ جوڑا Dirac–Maxwell نظام میں کئی مثالی متغیرات ہیں، اور Lee کا شماریاتی نقطہ نظر تحقیق کا نیا راستہ کھولتا ہے۔ یہ فریم ورک renormilized perturbation theory کی اندرونی مشکلات سے بچتا ہے اور اصولی طور پر QCD اور quark–gluon plasma تک پھیلایا جا سکتا ہے۔ 1997 کے فالو اپ مقالے نے اس سمت کو واضح طور پر آگے بڑھایا۔',
+          fa: 'مقاله ۱۹۹۳ در مورد تلاطم QED به مقاله Lee ۱۹۵۲ ارجاع داد. سیستم جفت‌شده دیراک–ماکسول دارای چند متغیر ایده‌آل است و رویکرد آماری Lee مسیر جدیدی برای تحقیق می‌گشاید. این چارچوب مشکلات ذاتی نظریه اختلالات نرمالیزه‌شده را دور می‌زند و در اصل می‌تواند به QCD و پلاسماکوارک–گلئون گسترش یابد. مقاله پیگیری ۱۹۹۷ به‌طور ضمنی این جهت را ادامه داد.',
+          ar: 'استشهد مقال عام 1993 حول اضطراب QED بـ Lee 1952: يمتلك نظام Dirac–Maxwell المقترن عدة ثوابت مثالية، ويفتح نهج Lee الإحصائي طريقًا جديدًا للتحقيق. يتجنب هذا الإطار الصعوبات الكامنة في نظرية الاضطرابات المعادلة، ويمكن من حيث المبدأ توسيعه ليشمل QCD وبلازما الكوارك–الغلون. واصلت ورقة متابعة عام 1997 هذا الاتجاه ضمنيًا.'
         },
         createdAt: now
       }
@@ -209,15 +236,44 @@ function loadState() {
     }
     state = parsed;
     let migrated = false;
-    const opening = state.announcements.find((item) => item.title && item.title.zh === '开幕报告：湍流统计理论的起源与回响');
-    if (opening && opening.date !== '2026-11-25') {
-      opening.date = '2026-11-25';
+
+    // Remove the old seminar entry that has been pulled
+    const oldSeminar = state.announcements.find((item) =>
+      item.title && item.title.zh === '系列研讨会（一）：磁流体湍流的统计性质'
+    );
+    if (oldSeminar) {
+      state.announcements = state.announcements.filter((item) => item !== oldSeminar);
       migrated = true;
     }
-    const registration = state.announcements.find((item) => item.title && item.title.zh === '参会注册与报告征稿正式开放');
+
+    // Normalize the registration notice — update date, dateLabel, and multilingual title
+    const registrationOld = state.announcements.find((item) =>
+      item.title && item.title.zh === '参会注册与报告征稿正式开放'
+    );
+    const registrationNew = state.announcements.find((item) =>
+      item.title && item.title.zh === '参会注册与报告征稿正式开放，揭幕'
+    );
+    const registration = registrationNew || registrationOld;
     if (registration) {
       if (registration.date !== '2026-11-24') {
         registration.date = '2026-11-24';
+        migrated = true;
+      }
+      if (!registrationNew) {
+        registration.title = {
+          zh: '参会注册与报告征稿正式开放，揭幕',
+          en: 'Registration and Call for Contributions Now Open — Kickoff',
+          fr: 'Ouverture des inscriptions et de l’appel à contributions — Lancement',
+          ru: 'Регистрация и приём тезисов открыты — старт',
+          de: 'Anmeldung und Beitragseinreichung geöffnet — Auftakt',
+          it: 'Iscrizione e call for contributions aperti — avvio',
+          es: 'Inscripción y llamada a contribuciones abiertas — lanzamiento',
+          ko: '등록 및 발표 신청 공식 오픈 — 킥오프',
+          ja: '参加登録と報告募集正式開始——キックオフ',
+          ur: 'رجسٹریشن اور تقاریر کی دعوت رسمی طور پر کھل گئی',
+          fa: 'ثبت‌نام و فراخوان مقالات رسماً آغاز شد',
+          ar: 'التسجيل ودعوة المساهمات مفتوحة رسميًا — انطلاق'
+        };
         migrated = true;
       }
       const labels = registration.dateLabel || {};
@@ -227,6 +283,18 @@ function loadState() {
         migrated = true;
       }
     }
+
+    // Ensure the QED/QCD turbulence lecture is present
+    const qedTitleZh = 'QED 与 QCD 湍流中的统计方法——李政道 1952 年遗产';
+    if (!state.announcements.some((item) => item.title && item.title.zh === qedTitleZh)) {
+      const seeded = seedState();
+      const qed = seeded.announcements.find((item) => item.tag === 'lecture');
+      if (qed) {
+        state.announcements.push(qed);
+        migrated = true;
+      }
+    }
+
     if (migrated) persist();
   } catch {
     state = seedState();
