@@ -14,8 +14,28 @@ const PORT = Number(process.env.PORT) || 8000;
 const HOST = '0.0.0.0';
 const APP_ROOT = __dirname;
 const PUBLIC_DIR = path.join(APP_ROOT, 'public');
-const DATA_DIR = path.join(APP_ROOT, '.data');
-const STATE_DIR = path.join(DATA_DIR, 'state');
+
+function findWritableStateDir() {
+  const candidates = [
+    path.join(APP_ROOT, '.data', 'state'),
+    path.join(process.env.TMPDIR || '/tmp', 'tdlee100-state')
+  ];
+  for (const dir of candidates) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      const probe = path.join(dir, '.probe-' + process.pid);
+      fs.writeFileSync(probe, 'ok');
+      fs.unlinkSync(probe);
+      console.log('[state] using directory:', dir);
+      return dir;
+    } catch (err) {
+      console.warn('[state] cannot use', dir, ':', err.code || err.message);
+    }
+  }
+  throw new Error('no writable directory found for state');
+}
+
+const STATE_DIR = findWritableStateDir();
 const STATE_FILE = path.join(STATE_DIR, 'state.json');
 const UPLOADS_DIR = path.join(STATE_DIR, 'uploads');
 const MAX_PDF_SIZE = 2 * 1024 * 1024;
