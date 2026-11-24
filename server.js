@@ -9,6 +9,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { buildRegistrationsPdf } = require('./pdf-report');
 
 const PORT = Number(process.env.PORT) || 8000;
 const HOST = '0.0.0.0';
@@ -951,6 +952,25 @@ async function handleApi(req, res, pathname) {
 
     if (pathname === '/api/admin/backup' && method === 'GET') {
       return sendJson(res, 200, { backup: createBackup() });
+    }
+
+    if (pathname === '/api/admin/registrations.pdf' && method === 'GET') {
+      const registrations = state.users
+        .filter((u) => u.role !== 'admin')
+        .slice()
+        .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)))
+        .map(publicUser);
+      const pdf = buildRegistrationsPdf(registrations);
+      res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Length': pdf.length,
+        'Content-Disposition': 'attachment; filename="registrations-' +
+          new Date().toISOString().slice(0, 10) + '.pdf"',
+        'Cache-Control': 'private, no-store',
+        'X-Content-Type-Options': 'nosniff'
+      });
+      res.end(pdf);
+      return;
     }
 
     if (pathname === '/api/admin/backup' && method === 'POST') {

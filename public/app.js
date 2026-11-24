@@ -873,6 +873,16 @@
     }
   }
 
+  async function exportRegistrationsPdf() {
+    try {
+      const blob = await api('/api/admin/registrations.pdf', { responseType: 'blob' });
+      saveBlob(blob, 'tdlee100-registrations-' + new Date().toISOString().slice(0, 10) + '.pdf');
+      toast(t('toast.pdfExported'));
+    } catch (err) {
+      toast(errorMessage(err.code));
+    }
+  }
+
   async function importBackup(event) {
     const input = event.currentTarget;
     const file = input.files && input.files[0];
@@ -1218,6 +1228,8 @@
     }
     const exportBackupBtn = $('#admin-export-backup');
     if (exportBackupBtn) exportBackupBtn.addEventListener('click', exportBackup);
+    const exportPdfBtn = $('#admin-export-registrations-pdf');
+    if (exportPdfBtn) exportPdfBtn.addEventListener('click', exportRegistrationsPdf);
     const importBackupInput = $('#admin-import-backup');
     if (importBackupInput) importBackupInput.addEventListener('change', importBackup);
     const logoutBtn = $('#logout-btn');

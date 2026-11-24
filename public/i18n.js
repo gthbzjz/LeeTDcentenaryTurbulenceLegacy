@@ -2413,3 +2413,60 @@ Object.assign(window.I18N, {
     Object.assign(window.I18N[code], additions[code]);
   });
 })();
+
+(function () {
+  var additions = {
+    zh: {
+      'admin.exportRegistrationsPdf': '导出名单 PDF',
+      'toast.pdfExported': '名单 PDF 已导出。'
+    },
+    en: {
+      'admin.exportRegistrationsPdf': 'Export list as PDF',
+      'toast.pdfExported': 'The registration list PDF has been exported.'
+    },
+    fr: {
+      'admin.exportRegistrationsPdf': 'Exporter la liste en PDF',
+      'toast.pdfExported': 'La liste des inscrits a été exportée en PDF.'
+    },
+    ru: {
+      'admin.exportRegistrationsPdf': 'Экспорт списка в PDF',
+      'toast.pdfExported': 'Список регистраций экспортирован в PDF.'
+    },
+    de: {
+      'admin.exportRegistrationsPdf': 'Liste als PDF exportieren',
+      'toast.pdfExported': 'Die Teilnehmerliste wurde als PDF exportiert.'
+    },
+    it: {
+      'admin.exportRegistrationsPdf': "Esporta l'elenco in PDF",
+      'toast.pdfExported': "L'elenco delle iscrizioni è stato esportato in PDF."
+    },
+    es: {
+      'admin.exportRegistrationsPdf': 'Exportar la lista a PDF',
+      'toast.pdfExported': 'La lista de inscripciones se ha exportado en PDF.'
+    },
+    ko: {
+      'admin.exportRegistrationsPdf': '명단 PDF 내보내기',
+      'toast.pdfExported': '명단 PDF를 내보냈습니다.'
+    },
+    ja: {
+      'admin.exportRegistrationsPdf': '名簿をPDFで書き出す',
+      'toast.pdfExported': '名簿のPDFを書き出しました。'
+    },
+    ur: {
+      'admin.exportRegistrationsPdf': 'فہرست PDF میں برآمد کریں',
+      'toast.pdfExported': 'رجسٹریشن فہرست PDF میں برآمد ہو گئی۔'
+    },
+    fa: {
+      'admin.exportRegistrationsPdf': 'خروجی فهرست به‌صورت PDF',
+      'toast.pdfExported': 'فهرست ثبت‌نام به‌صورت PDF صادر شد.'
+    },
+    ar: {
+      'admin.exportRegistrationsPdf': 'تصدير القائمة بصيغة PDF',
+      'toast.pdfExported': 'تم تصدير قائمة التسجيلات بصيغة PDF.'
+    }
+  };
+  Object.keys(additions).forEach(function (code) {
+    if (!window.I18N[code]) window.I18N[code] = {};
+    Object.assign(window.I18N[code], additions[code]);
+  });
+})();
