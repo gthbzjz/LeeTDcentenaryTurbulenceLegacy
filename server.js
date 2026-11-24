@@ -12,8 +12,10 @@ const crypto = require('crypto');
 
 const PORT = Number(process.env.PORT) || 8000;
 const HOST = '0.0.0.0';
-const PUBLIC_DIR = path.join(__dirname, 'public');
-const STATE_DIR = path.join(process.env.TMPDIR || '/tmp', 'tdlee100-state');
+const APP_ROOT = __dirname;
+const PUBLIC_DIR = path.join(APP_ROOT, 'public');
+const DATA_DIR = path.join(APP_ROOT, '.data');
+const STATE_DIR = path.join(DATA_DIR, 'state');
 const STATE_FILE = path.join(STATE_DIR, 'state.json');
 const UPLOADS_DIR = path.join(STATE_DIR, 'uploads');
 const MAX_PDF_SIZE = 2 * 1024 * 1024;
