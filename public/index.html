@@ -316,6 +316,28 @@
                 <span data-i18n="auth.notes">备注（可选）</span>
                 <textarea name="notes" rows="3" maxlength="500" data-i18n-ph="auth.notesPlaceholder"></textarea>
               </label>
+              <label class="field">
+                <span data-i18n="auth.presentationAsk">是否申请报告？</span>
+                <select name="presentation-requested" data-presentation-requested>
+                  <option value="no" data-i18n="auth.presentationNo">否，仅参会</option>
+                  <option value="yes" data-i18n="auth.presentationYes">是，申请报告</option>
+                </select>
+              </label>
+              <div class="presentation-fields" data-presentation-fields hidden>
+                <label class="field">
+                  <span data-i18n="auth.presentationTitle">报告题目</span>
+                  <input name="presentation-title" type="text" maxlength="300" disabled />
+                </label>
+                <label class="field">
+                  <span data-i18n="auth.presentationAbstract">报告摘要</span>
+                  <textarea name="presentation-abstract" rows="5" maxlength="5000" disabled></textarea>
+                </label>
+                <label class="field file-field">
+                  <span data-i18n="auth.presentationPdf">摘要 PDF（可选）</span>
+                  <input name="presentation-pdf" type="file" accept="application/pdf,.pdf" disabled />
+                  <small data-i18n="auth.pdfHint">仅接受 PDF，最大 2 MiB。</small>
+                </label>
+              </div>
               <p class="form-error" id="register-error" hidden></p>
               <button class="btn btn-gold btn-block" type="submit" data-i18n="auth.submitRegister">提交注册</button>
             </form>
@@ -340,6 +362,43 @@
               <div class="account-actions">
                 <a class="btn btn-outline-dark" href="#forum" data-i18n="auth.goForum">前往交流区</a>
                 <button type="button" class="btn btn-outline-dark" id="logout-btn" data-i18n="auth.logout">退出登录</button>
+              </div>
+              <div id="presentation-editor" class="presentation-editor" hidden>
+                <h4 data-i18n="auth.presentationEdit">我的报告信息</h4>
+                <form id="presentation-form" class="auth-form" novalidate>
+                  <label class="field">
+                    <span data-i18n="auth.presentationAsk">是否申请报告？</span>
+                    <select name="requested" data-presentation-requested>
+                      <option value="no" data-i18n="auth.presentationNo">否，仅参会</option>
+                      <option value="yes" data-i18n="auth.presentationYes">是，申请报告</option>
+                    </select>
+                  </label>
+                  <div class="presentation-fields" data-presentation-fields hidden>
+                    <label class="field">
+                      <span data-i18n="auth.presentationTitle">报告题目</span>
+                      <input name="title" type="text" maxlength="300" disabled />
+                    </label>
+                    <label class="field">
+                      <span data-i18n="auth.presentationAbstract">报告摘要</span>
+                      <textarea name="abstract" rows="5" maxlength="5000" disabled></textarea>
+                    </label>
+                    <div id="presentation-current-pdf" class="pdf-existing" hidden>
+                      <span id="presentation-pdf-name"></span>
+                      <button type="button" class="mini-btn" id="presentation-download" data-i18n="auth.downloadPdf">下载 PDF</button>
+                    </div>
+                    <label class="field file-field">
+                      <span data-i18n="auth.presentationPdfReplace">上传或替换摘要 PDF（可选）</span>
+                      <input name="pdf" type="file" accept="application/pdf,.pdf" disabled />
+                      <small data-i18n="auth.pdfHint">仅接受 PDF，最大 2 MiB。</small>
+                    </label>
+                    <label class="check-field" id="presentation-remove-wrap" hidden>
+                      <input type="checkbox" name="removePdf" />
+                      <span data-i18n="auth.removePdf">保存时删除已上传的 PDF</span>
+                    </label>
+                  </div>
+                  <p class="form-error" id="presentation-error" hidden></p>
+                  <button class="btn btn-outline-dark" type="submit" data-i18n="auth.savePresentation">保存报告信息</button>
+                </form>
               </div>
               <p class="account-admin" id="account-admin" hidden>
                 <a href="#admin" data-i18n="auth.adminHint">进入管理后台</a>
@@ -440,6 +499,16 @@
         </div>
 
         <div class="admin-panel" data-admin-panel="registrations" hidden>
+          <div class="backup-actions">
+            <p data-i18n="admin.backupHint">完整备份包含账号凭据和附件，请妥善保管；部署前导出，部署后恢复。</p>
+            <div class="backup-buttons">
+              <button type="button" class="btn btn-outline-dark btn-sm" id="admin-export-backup" data-i18n="admin.exportBackup">导出完整备份</button>
+              <label class="btn btn-outline-dark btn-sm backup-import-label">
+                <span data-i18n="admin.importBackup">导入并恢复备份</span>
+                <input id="admin-import-backup" type="file" accept="application/json,.json" hidden />
+              </label>
+            </div>
+          </div>
           <div class="table-wrap">
             <table class="registrations-table">
               <thead>
@@ -449,6 +518,9 @@
                   <th data-i18n="admin.colAffiliation">单位</th>
                   <th data-i18n="admin.colPosition">职称 / 职务</th>
                   <th data-i18n="admin.colCountry">国家 / 地区</th>
+                  <th data-i18n="admin.colNotes">备注</th>
+                  <th data-i18n="admin.colPresentation">报告与摘要</th>
+                  <th data-i18n="admin.colPdf">PDF</th>
                   <th data-i18n="admin.colDate">注册时间</th>
                 </tr>
               </thead>

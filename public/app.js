@@ -227,6 +227,7 @@
       err.code = 'network';
       throw err;
     }
+    if (response.ok && opts.responseType === 'blob') return response.blob();
     let data = null;
     try { data = await response.json(); } catch (e) { data = null; }
     if (!response.ok) {
@@ -419,6 +420,24 @@
       $('#account-admin').hidden = !isAdmin;
       $('#nav-admin').hidden = !isAdmin;
       $('#admin').hidden = !isAdmin;
+      const editor = $('#presentation-editor');
+      if (editor) {
+        editor.hidden = isAdmin;
+        if (!isAdmin) {
+          const form = $('#presentation-form');
+          const presentation = state.user.presentation || { requested: false, title: '', abstract: '', pdf: null };
+          form.elements.requested.value = presentation.requested ? 'yes' : 'no';
+          form.elements.title.value = presentation.title || '';
+          form.elements.abstract.value = presentation.abstract || '';
+          form.elements.pdf.value = '';
+          form.elements.removePdf.checked = false;
+          const hasPdf = !!(presentation.pdf && presentation.pdf.id);
+          $('#presentation-current-pdf').hidden = !hasPdf;
+          $('#presentation-remove-wrap').hidden = !hasPdf;
+          $('#presentation-pdf-name').textContent = hasPdf ? presentation.pdf.name : '';
+          syncPresentationFields(form);
+        }
+      }
       renderAdminAll();
     } else {
       $('#account-admin').hidden = true;
@@ -526,19 +545,34 @@
     const body = $('#registrations-body');
     if (!body) return;
     if (!state.registrations.length) {
-      body.innerHTML = '<tr><td colspan="6" class="table-empty">' + esc(t('admin.registeredEmpty')) + '</td></tr>';
+      body.innerHTML = '<tr><td colspan="9" class="table-empty">' + esc(t('admin.registeredEmpty')) + '</td></tr>';
       return;
     }
-    body.innerHTML = state.registrations.map((user) =>
-      '<tr>' +
+    body.innerHTML = state.registrations.map((user) => {
+      const presentation = user.presentation || {};
+      const requested = !!presentation.requested;
+      const presentationHtml = requested
+        ? '<div class="registration-presentation"><span class="tag-pill tag-lecture">' + esc(t('admin.presentationYes')) + '</span>' +
+          '<strong>' + esc(presentation.title || '—') + '</strong>' +
+          '<details><summary>' + esc(t('admin.viewAbstract')) + '</summary><p>' + esc(presentation.abstract || '—') + '</p></details></div>'
+        : esc(t('admin.presentationNo'));
+      const pdf = presentation.pdf;
+      const pdfHtml = pdf && pdf.id
+        ? '<div class="registration-pdf"><span>' + esc(pdf.name || 'abstract.pdf') + '</span>' +
+          '<button type="button" class="mini-btn" data-download-pdf="' + esc(user.id) + '" data-pdf-name="' + esc(pdf.name || 'abstract.pdf') + '">' + esc(t('admin.downloadPdf')) + '</button></div>'
+        : '—';
+      return '<tr>' +
         '<td>' + esc(user.name) + '</td>' +
         '<td>' + esc(user.email) + '</td>' +
         '<td>' + esc(user.affiliation || '—') + '</td>' +
         '<td>' + esc(user.position || '—') + '</td>' +
         '<td>' + esc(user.country || '—') + '</td>' +
+        '<td class="registration-notes">' + esc(user.notes || '—') + '</td>' +
+        '<td>' + presentationHtml + '</td>' +
+        '<td>' + pdfHtml + '</td>' +
         '<td>' + esc(formatDate(user.createdAt)) + '</td>' +
-      '</tr>'
-    ).join('');
+      '</tr>';
+    }).join('');
   }
 
   function setAdminTab(tab) {
@@ -567,12 +601,76 @@
     el.hidden = false;
   }
 
+  function syncPresentationFields(form) {
+    if (!form) return;
+    const select = form.querySelector('[data-presentation-requested]');
+    const fields = form.querySelector('[data-presentation-fields]');
+    if (!select || !fields) return;
+    const enabled = select.value === 'yes';
+    fields.hidden = !enabled;
+    fields.querySelectorAll('input, textarea').forEach((input) => {
+      input.disabled = !enabled;
+      if (!enabled && input.type !== 'checkbox') input.value = '';
+      if (!enabled && input.type === 'checkbox') input.checked = false;
+    });
+    const title = fields.querySelector('input[type="text"]');
+    const abstract = fields.querySelector('textarea');
+    if (title) title.required = enabled;
+    if (abstract) abstract.required = enabled;
+  }
+
+  function fileToPdfPayload(file) {
+    return new Promise((resolve, reject) => {
+      const fail = (code) => {
+        const err = new Error(code);
+        err.code = code;
+        reject(err);
+      };
+      if (!file || !/\.pdf$/i.test(file.name || '') || (file.type && file.type !== 'application/pdf')) {
+        fail('invalid-pdf');
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        fail('payload-too-large');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onerror = () => fail('invalid-pdf');
+      reader.onload = () => {
+        const result = String(reader.result || '');
+        resolve({ name: file.name, type: 'application/pdf', data: result.slice(result.indexOf(',') + 1) });
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function saveBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename || 'download';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function downloadRegistrationPdf(userId, filename) {
+    try {
+      const blob = await api('/api/registrations/' + encodeURIComponent(userId) + '/pdf', { responseType: 'blob' });
+      saveBlob(blob, filename || 'abstract.pdf');
+    } catch (err) {
+      toast(errorMessage(err.code));
+    }
+  }
+
   async function onRegister(event) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
     const errorEl = $('#register-error');
     if (errorEl) errorEl.hidden = true;
+    const requested = data.get('presentation-requested') === 'yes';
     const payload = {
       name: String(data.get('name') || '').trim(),
       email: String(data.get('email') || '').trim(),
@@ -580,23 +678,66 @@
       affiliation: String(data.get('affiliation') || '').trim(),
       position: String(data.get('position') || '').trim(),
       country: String(data.get('country') || '').trim(),
-      notes: String(data.get('notes') || '').trim()
+      notes: String(data.get('notes') || '').trim(),
+      presentation: {
+        requested,
+        title: requested ? String(data.get('presentation-title') || '').trim() : '',
+        abstract: requested ? String(data.get('presentation-abstract') || '').trim() : ''
+      }
     };
     if (!payload.name || !payload.email || payload.password.length < 6) {
       showFormError(errorEl, { code: 'invalid-fields' });
       return;
     }
+    if (requested && (!payload.presentation.title || !payload.presentation.abstract)) {
+      showFormError(errorEl, { code: 'presentation-required' });
+      return;
+    }
     try {
+      const file = data.get('presentation-pdf');
+      if (requested && file && file.size) payload.presentation.pdf = await fileToPdfPayload(file);
       const result = await api('/api/register', { method: 'POST', body: payload });
       state.token = result.token;
       state.user = result.user;
       localStorage.setItem('tdl_token', result.token);
       form.reset();
+      syncPresentationFields(form);
       toast(t('toast.registered'));
       renderAuth();
       renderComposer();
       await loadContent();
       await loadForum();
+    } catch (err) {
+      showFormError(errorEl, err);
+    }
+  }
+
+  async function onPresentationSubmit(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const errorEl = $('#presentation-error');
+    if (errorEl) errorEl.hidden = true;
+    const requested = data.get('requested') === 'yes';
+    const presentation = {
+      requested,
+      title: requested ? String(data.get('title') || '').trim() : '',
+      abstract: requested ? String(data.get('abstract') || '').trim() : ''
+    };
+    if (requested && (!presentation.title || !presentation.abstract)) {
+      showFormError(errorEl, { code: 'presentation-required' });
+      return;
+    }
+    try {
+      const file = data.get('pdf');
+      if (requested && file && file.size) presentation.pdf = await fileToPdfPayload(file);
+      const result = await api('/api/me/presentation', {
+        method: 'PUT',
+        body: { presentation, removePdf: data.get('removePdf') === 'on' }
+      });
+      state.user = result.user;
+      toast(t('toast.presentationSaved'));
+      renderAuth();
     } catch (err) {
       showFormError(errorEl, err);
     }
@@ -718,6 +859,42 @@
       await loadContent();
     } catch (err) {
       toast(err.status === 403 ? t('toast.adminRequired') : errorMessage(err.code));
+    }
+  }
+
+  async function exportBackup() {
+    try {
+      const result = await api('/api/admin/backup');
+      const blob = new Blob([JSON.stringify(result.backup, null, 2)], { type: 'application/json' });
+      saveBlob(blob, 'tdlee100-backup-' + new Date().toISOString().slice(0, 10) + '.json');
+      toast(t('toast.backupExported'));
+    } catch (err) {
+      toast(errorMessage(err.code));
+    }
+  }
+
+  async function importBackup(event) {
+    const input = event.currentTarget;
+    const file = input.files && input.files[0];
+    if (!file) return;
+    try {
+      if (file.size > 64 * 1024 * 1024) {
+        const err = new Error('payload-too-large');
+        err.code = 'payload-too-large';
+        throw err;
+      }
+      const backup = JSON.parse(await file.text());
+      if (!window.confirm(t('admin.restoreConfirm'))) return;
+      await api('/api/admin/backup', { method: 'POST', body: { backup } });
+      toast(t('toast.backupRestored'));
+      await restoreSession();
+      await Promise.all([loadContent(), loadForum()]);
+      if (state.user && state.user.role === 'admin') await loadRegistrations();
+      renderAll();
+    } catch (err) {
+      toast(errorMessage(err.code || 'invalid-backup'));
+    } finally {
+      input.value = '';
     }
   }
 
@@ -1018,6 +1195,31 @@
     if (registerForm) registerForm.addEventListener('submit', onRegister);
     const loginForm = $('#login-form');
     if (loginForm) loginForm.addEventListener('submit', onLogin);
+    const presentationForm = $('#presentation-form');
+    if (presentationForm) presentationForm.addEventListener('submit', onPresentationSubmit);
+    $$('[data-presentation-requested]').forEach((select) => {
+      const form = select.closest('form');
+      syncPresentationFields(form);
+      select.addEventListener('change', () => syncPresentationFields(form));
+    });
+    const presentationDownload = $('#presentation-download');
+    if (presentationDownload) {
+      presentationDownload.addEventListener('click', () => {
+        const pdf = state.user && state.user.presentation && state.user.presentation.pdf;
+        if (state.user && pdf) downloadRegistrationPdf(state.user.id, pdf.name);
+      });
+    }
+    const registrationsBody = $('#registrations-body');
+    if (registrationsBody) {
+      registrationsBody.addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-download-pdf]');
+        if (btn) downloadRegistrationPdf(btn.dataset.downloadPdf, btn.dataset.pdfName);
+      });
+    }
+    const exportBackupBtn = $('#admin-export-backup');
+    if (exportBackupBtn) exportBackupBtn.addEventListener('click', exportBackup);
+    const importBackupInput = $('#admin-import-backup');
+    if (importBackupInput) importBackupInput.addEventListener('change', importBackup);
     const logoutBtn = $('#logout-btn');
     if (logoutBtn) logoutBtn.addEventListener('click', onLogout);
 

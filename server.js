@@ -15,6 +15,10 @@ const HOST = '0.0.0.0';
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const STATE_DIR = path.join(process.env.TMPDIR || '/tmp', 'tdlee100-state');
 const STATE_FILE = path.join(STATE_DIR, 'state.json');
+const UPLOADS_DIR = path.join(STATE_DIR, 'uploads');
+const MAX_PDF_SIZE = 2 * 1024 * 1024;
+const PDF_BODY_LIMIT = 3 * 1024 * 1024;
+const BACKUP_BODY_LIMIT = 64 * 1024 * 1024;
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 
 const sessions = new Map();
@@ -217,94 +221,164 @@ function persist() {
   if (persistTimer) clearTimeout(persistTimer);
   persistTimer = setTimeout(() => {
     persistTimer = null;
+    const temporaryFile = STATE_FILE + '.' + process.pid + '.' + crypto.randomUUID() + '.tmp';
     try {
       fs.mkdirSync(STATE_DIR, { recursive: true });
-      fs.writeFileSync(STATE_FILE, JSON.stringify(state), 'utf8');
+      fs.writeFileSync(temporaryFile, JSON.stringify(state), 'utf8');
+      fs.renameSync(temporaryFile, STATE_FILE);
     } catch (err) {
+      try {
+        fs.rmSync(temporaryFile, { force: true });
+      } catch {
+        // Keep the original persistence error.
+      }
       console.error('state persist failed:', err.message);
     }
   }, 200);
   if (persistTimer.unref) persistTimer.unref();
 }
 
+function emptyPresentation() {
+  return { requested: false, title: '', abstract: '', pdf: null };
+}
+
+function isRecord(value) {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function hasStateShape(value) {
+  return isRecord(value) &&
+    Array.isArray(value.users) &&
+    Array.isArray(value.announcements) &&
+    Array.isArray(value.materials) &&
+    Array.isArray(value.forum) &&
+    isRecord(value.committees) &&
+    Array.isArray(value.committees.advisory) &&
+    Array.isArray(value.committees.organizing) &&
+    Array.isArray(value.committees.hosts);
+}
+
 function loadState() {
+  let raw;
   try {
-    const raw = fs.readFileSync(STATE_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!parsed || !Array.isArray(parsed.users) || !Array.isArray(parsed.announcements)) {
-      throw new Error('invalid state');
-    }
-    state = parsed;
-    let migrated = false;
-
-    // Remove the old seminar entry that has been pulled
-    const oldSeminar = state.announcements.find((item) =>
-      item.title && item.title.zh === '系列研讨会（一）：磁流体湍流的统计性质'
-    );
-    if (oldSeminar) {
-      state.announcements = state.announcements.filter((item) => item !== oldSeminar);
-      migrated = true;
-    }
-
-    // Normalize the registration notice — update date, dateLabel, and multilingual title
-    const registrationOld = state.announcements.find((item) =>
-      item.title && item.title.zh === '参会注册与报告征稿正式开放'
-    );
-    const registrationNew = state.announcements.find((item) =>
-      item.title && item.title.zh === '参会注册与报告征稿正式开放，揭幕'
-    );
-    const registration = registrationNew || registrationOld;
-    if (registration) {
-      if (registration.date !== '2026-11-24') {
-        registration.date = '2026-11-24';
-        migrated = true;
-      }
-      if (!registrationNew) {
-        registration.title = {
-          zh: '参会注册与报告征稿正式开放，揭幕',
-          en: 'Registration and Call for Contributions Now Open — Kickoff',
-          fr: 'Ouverture des inscriptions et de l’appel à contributions — Lancement',
-          ru: 'Регистрация и приём тезисов открыты — старт',
-          de: 'Anmeldung und Beitragseinreichung geöffnet — Auftakt',
-          it: 'Iscrizione e call for contributions aperti — avvio',
-          es: 'Inscripción y llamada a contribuciones abiertas — lanzamiento',
-          ko: '등록 및 발표 신청 공식 오픈 — 킥오프',
-          ja: '参加登録と報告募集正式開始——キックオフ',
-          ur: 'رجسٹریشن اور تقاریر کی دعوت رسمی طور پر کھل گئی',
-          fa: 'ثبت‌نام و فراخوان مقالات رسماً آغاز شد',
-          ar: 'التسجيل ودعوة المساهمات مفتوحة رسميًا — انطلاق'
-        };
-        migrated = true;
-      }
-      const labels = registration.dateLabel || {};
-      const labelsNeedUpdate = Object.keys(SERIES_RANGE_LABELS).some((lang) => labels[lang] !== SERIES_RANGE_LABELS[lang]);
-      if (labelsNeedUpdate) {
-        registration.dateLabel = { ...SERIES_RANGE_LABELS };
-        migrated = true;
-      }
-    }
-
-    // Ensure the QED/QCD turbulence lecture is present
-    const qedTitleZh = 'QED 与 QCD 湍流中的统计方法——李政道 1952 年遗产';
-    if (!state.announcements.some((item) => item.title && item.title.zh === qedTitleZh)) {
-      const seeded = seedState();
-      const qed = seeded.announcements.find((item) => item.tag === 'lecture');
-      if (qed) {
-        state.announcements.push(qed);
-        migrated = true;
-      }
-    }
-
-    if (migrated) persist();
-  } catch {
+    raw = fs.readFileSync(STATE_FILE, 'utf8');
+  } catch (err) {
+    if (!err || err.code !== 'ENOENT') throw err;
     state = seedState();
     persist();
+    return;
   }
+
+  const parsed = JSON.parse(raw);
+  if (!hasStateShape(parsed)) throw new Error('invalid state');
+  state = parsed;
+  let migrated = false;
+
+  for (const account of state.users) {
+    if (!isRecord(account) || account.role === 'admin') continue;
+    if (!isRecord(account.presentation)) {
+      account.presentation = emptyPresentation();
+      migrated = true;
+      continue;
+    }
+    if (typeof account.presentation.requested !== 'boolean') {
+      account.presentation.requested = false;
+      migrated = true;
+    }
+    if (typeof account.presentation.title !== 'string') {
+      account.presentation.title = '';
+      migrated = true;
+    }
+    if (typeof account.presentation.abstract !== 'string') {
+      account.presentation.abstract = '';
+      migrated = true;
+    }
+    if (account.presentation.pdf === undefined) {
+      account.presentation.pdf = null;
+      migrated = true;
+    }
+  }
+
+  // Remove the old seminar entry that has been pulled
+  const oldSeminar = state.announcements.find((item) =>
+    item.title && item.title.zh === '系列研讨会（一）：磁流体湍流的统计性质'
+  );
+  if (oldSeminar) {
+    state.announcements = state.announcements.filter((item) => item !== oldSeminar);
+    migrated = true;
+  }
+
+  // Normalize the registration notice — update date, dateLabel, and multilingual title
+  const registrationOld = state.announcements.find((item) =>
+    item.title && item.title.zh === '参会注册与报告征稿正式开放'
+  );
+  const registrationNew = state.announcements.find((item) =>
+    item.title && item.title.zh === '参会注册与报告征稿正式开放，揭幕'
+  );
+  const registration = registrationNew || registrationOld;
+  if (registration) {
+    if (registration.date !== '2026-11-24') {
+      registration.date = '2026-11-24';
+      migrated = true;
+    }
+    if (!registrationNew) {
+      registration.title = {
+        zh: '参会注册与报告征稿正式开放，揭幕',
+        en: 'Registration and Call for Contributions Now Open — Kickoff',
+        fr: 'Ouverture des inscriptions et de l’appel à contributions — Lancement',
+        ru: 'Регистрация и приём тезисов открыты — старт',
+        de: 'Anmeldung und Beitragseinreichung geöffnet — Auftakt',
+        it: 'Iscrizione e call for contributions aperti — avvio',
+        es: 'Inscripción y llamada a contribuciones abiertas — lanzamiento',
+        ko: '등록 및 발표 신청 공식 오픈 — 킥오프',
+        ja: '参加登録と報告募集正式開始——キックオフ',
+        ur: 'رجسٹریشن اور تقاریر کی دعوت رسمی طور پر کھل گئی',
+        fa: 'ثبت‌نام و فراخوان مقالات رسماً آغاز شد',
+        ar: 'التسجيل ودعوة المساهمات مفتوحة رسميًا — انطلاق'
+      };
+      migrated = true;
+    }
+    const labels = registration.dateLabel || {};
+    const labelsNeedUpdate = Object.keys(SERIES_RANGE_LABELS).some((lang) => labels[lang] !== SERIES_RANGE_LABELS[lang]);
+    if (labelsNeedUpdate) {
+      registration.dateLabel = { ...SERIES_RANGE_LABELS };
+      migrated = true;
+    }
+  }
+
+  // Ensure the QED/QCD turbulence lecture is present
+  const qedTitleZh = 'QED 与 QCD 湍流中的统计方法——李政道 1952 年遗产';
+  if (!state.announcements.some((item) => item.title && item.title.zh === qedTitleZh)) {
+    const seeded = seedState();
+    const qed = seeded.announcements.find((item) => item.tag === 'lecture');
+    if (qed) {
+      state.announcements.push(qed);
+      migrated = true;
+    }
+  }
+
+  if (migrated) persist();
 }
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
+
+function publicPresentation(presentation) {
+  const source = isRecord(presentation) ? presentation : emptyPresentation();
+  const pdf = isRecord(source.pdf) ? source.pdf : null;
+  return {
+    requested: source.requested === true,
+    title: typeof source.title === 'string' ? source.title : '',
+    abstract: typeof source.abstract === 'string' ? source.abstract : '',
+    pdf: pdf ? {
+      id: pdf.id,
+      name: pdf.name,
+      size: pdf.size,
+      updatedAt: pdf.updatedAt
+    } : null
+  };
+}
 
 function publicUser(user) {
   return {
@@ -314,8 +388,10 @@ function publicUser(user) {
     affiliation: user.affiliation,
     position: user.position,
     country: user.country,
+    notes: typeof user.notes === 'string' ? user.notes : '',
     role: user.role,
-    createdAt: user.createdAt
+    createdAt: user.createdAt,
+    presentation: publicPresentation(user.presentation)
   };
 }
 
@@ -385,6 +461,249 @@ function tri(value, max) {
     en: text(source.en, max),
     fr: text(source.fr, max)
   };
+}
+
+function presentationValues(value) {
+  const source = isRecord(value) ? value : {};
+  if (source.requested !== true) return emptyPresentation();
+  const title = text(source.title, 300);
+  const abstract = text(source.abstract, 5000);
+  if (!title || !abstract) throw new Error('presentation-required');
+  return { requested: true, title, abstract, pdf: null };
+}
+
+function cleanPdfName(value) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\x00-\x1F\x7F-\x9F]/g, '').trim();
+}
+
+function decodePdfBase64(value, allowDataUrl) {
+  if (typeof value !== 'string') throw new Error('invalid-pdf');
+  const prefix = 'data:application/pdf;base64,';
+  let encoded = value;
+  if (allowDataUrl && encoded.startsWith('data:')) {
+    if (!encoded.startsWith(prefix)) throw new Error('invalid-pdf');
+    encoded = encoded.slice(prefix.length);
+  }
+  const maxEncodedLength = 4 * Math.ceil(MAX_PDF_SIZE / 3);
+  if (!encoded || encoded.length > maxEncodedLength || encoded.length % 4 !== 0 ||
+      !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded)) {
+    throw new Error('invalid-pdf');
+  }
+  const buffer = Buffer.from(encoded, 'base64');
+  if (buffer.length > MAX_PDF_SIZE || buffer.toString('base64') !== encoded ||
+      buffer.subarray(0, 5).toString('ascii') !== '%PDF-') {
+    throw new Error('invalid-pdf');
+  }
+  return buffer;
+}
+
+function parsePdfUpload(value) {
+  if (!isRecord(value) || value.type !== 'application/pdf') throw new Error('invalid-pdf');
+  const name = cleanPdfName(value.name);
+  if (!name || path.extname(name).toLowerCase() !== '.pdf') throw new Error('invalid-pdf');
+  return { name, buffer: decodePdfBase64(value.data, true) };
+}
+
+function pdfFilePath(id) {
+  if (typeof id !== 'string' ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return null;
+  }
+  const uploadsRoot = path.resolve(UPLOADS_DIR);
+  const resolved = path.resolve(uploadsRoot, id + '.pdf');
+  if (!resolved.startsWith(uploadsRoot + path.sep)) return null;
+  return resolved;
+}
+
+function savePdf(upload) {
+  const id = crypto.randomUUID();
+  const file = pdfFilePath(id);
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  fs.writeFileSync(file, upload.buffer, { flag: 'wx' });
+  return {
+    id,
+    name: upload.name,
+    size: upload.buffer.length,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function deletePdf(pdf) {
+  if (!isRecord(pdf)) return;
+  const file = pdfFilePath(pdf.id);
+  if (!file) return;
+  try {
+    fs.unlinkSync(file);
+  } catch (err) {
+    if (!err || err.code !== 'ENOENT') throw err;
+  }
+}
+
+function pdfContentDisposition(value) {
+  const name = cleanPdfName(value) || 'abstract.pdf';
+  const fallback = name.replace(/[^A-Za-z0-9._-]/g, '_');
+  const encoded = encodeURIComponent(name).replace(/['()*]/g, (character) =>
+    '%' + character.charCodeAt(0).toString(16).toUpperCase()
+  );
+  return 'attachment; filename="' + fallback + '"; filename*=UTF-8\'\'' + encoded;
+}
+
+function createBackup() {
+  const snapshot = JSON.parse(JSON.stringify(state));
+  for (let index = 0; index < snapshot.users.length; index += 1) {
+    const pdf = snapshot.users[index].presentation && snapshot.users[index].presentation.pdf;
+    if (!pdf) continue;
+    const file = pdfFilePath(pdf.id);
+    if (!file) throw new Error('invalid state pdf');
+    pdf.data = fs.readFileSync(file).toString('base64');
+  }
+  return {
+    format: 'tdlee100-backup',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    state: snapshot
+  };
+}
+
+function requireBackup(condition) {
+  if (!condition) throw new Error('invalid-backup');
+}
+
+function validateBackup(backup) {
+  requireBackup(isRecord(backup) && backup.format === 'tdlee100-backup' && backup.version === 1);
+  requireBackup(typeof backup.exportedAt === 'string' && backup.exportedAt);
+  requireBackup(hasStateShape(backup.state));
+
+  const source = backup.state;
+  for (const key of ['announcements', 'materials', 'forum']) {
+    requireBackup(source[key].every(isRecord));
+  }
+  for (const key of ['advisory', 'organizing', 'hosts']) {
+    requireBackup(source.committees[key].every(isRecord));
+  }
+
+  const restored = JSON.parse(JSON.stringify(source));
+  const pdfFiles = [];
+  const userIds = new Set();
+  const emails = new Set();
+  const pdfIds = new Set();
+
+  for (let index = 0; index < source.users.length; index += 1) {
+    const account = source.users[index];
+    requireBackup(isRecord(account));
+    for (const field of ['id', 'name', 'email', 'salt', 'passwordHash', 'role', 'createdAt']) {
+      requireBackup(typeof account[field] === 'string' && account[field].length > 0);
+    }
+    requireBackup(account.role === 'admin' || account.role === 'member');
+    requireBackup(!userIds.has(account.id) && !emails.has(account.email.toLowerCase()));
+    userIds.add(account.id);
+    emails.add(account.email.toLowerCase());
+    for (const field of ['affiliation', 'position', 'country', 'notes']) {
+      requireBackup(account[field] === undefined || typeof account[field] === 'string');
+    }
+
+    if (account.role === 'admin' && account.presentation === undefined) continue;
+    const presentation = account.presentation;
+    requireBackup(isRecord(presentation));
+    requireBackup(typeof presentation.requested === 'boolean');
+    requireBackup(typeof presentation.title === 'string' && presentation.title.length <= 300);
+    requireBackup(typeof presentation.abstract === 'string' && presentation.abstract.length <= 5000);
+    if (presentation.requested) {
+      requireBackup(Boolean(presentation.title.trim() && presentation.abstract.trim()));
+    }
+    requireBackup(presentation.pdf === null || isRecord(presentation.pdf));
+
+    if (presentation.pdf !== null) {
+      const pdf = presentation.pdf;
+      requireBackup(presentation.requested);
+      requireBackup(pdfFilePath(pdf.id) !== null && !pdfIds.has(pdf.id));
+      requireBackup(typeof pdf.name === 'string' && cleanPdfName(pdf.name) === pdf.name &&
+        path.extname(pdf.name).toLowerCase() === '.pdf');
+      requireBackup(pdf.type === undefined || pdf.type === 'application/pdf');
+      requireBackup(Number.isInteger(pdf.size) && pdf.size > 0 && pdf.size <= MAX_PDF_SIZE);
+      requireBackup(typeof pdf.updatedAt === 'string' && pdf.updatedAt);
+      let buffer;
+      try {
+        buffer = decodePdfBase64(pdf.data, false);
+      } catch (err) {
+        if (err && err.message === 'invalid-pdf') throw new Error('invalid-backup');
+        throw err;
+      }
+      requireBackup(buffer.length === pdf.size);
+      pdfIds.add(pdf.id);
+      pdfFiles.push({ id: pdf.id, buffer });
+      restored.users[index].presentation.pdf = {
+        id: pdf.id,
+        name: pdf.name,
+        size: pdf.size,
+        updatedAt: pdf.updatedAt
+      };
+    }
+  }
+
+  return { state: restored, pdfFiles };
+}
+
+function cleanupDirectory(directory) {
+  try {
+    fs.rmSync(directory, { recursive: true, force: true });
+  } catch (err) {
+    console.error('backup cleanup failed:', err.message);
+  }
+}
+
+function restoreBackup(prepared) {
+  const suffix = process.pid + '.' + crypto.randomUUID();
+  const staging = STATE_DIR + '.staging-' + suffix;
+  const previous = STATE_DIR + '.old-' + suffix;
+  let stagingCreated = false;
+  let previousMoved = false;
+  let switched = false;
+
+  try {
+    fs.mkdirSync(path.dirname(STATE_DIR), { recursive: true });
+    fs.mkdirSync(staging, { recursive: true });
+    stagingCreated = true;
+    fs.mkdirSync(path.join(staging, 'uploads'), { recursive: true });
+    for (const pdf of prepared.pdfFiles) {
+      fs.writeFileSync(path.join(staging, 'uploads', pdf.id + '.pdf'), pdf.buffer, { flag: 'wx' });
+    }
+    fs.writeFileSync(path.join(staging, 'state.json'), JSON.stringify(prepared.state), 'utf8');
+
+    if (persistTimer) {
+      clearTimeout(persistTimer);
+      persistTimer = null;
+    }
+    try {
+      fs.renameSync(STATE_DIR, previous);
+      previousMoved = true;
+    } catch (err) {
+      if (!err || err.code !== 'ENOENT') throw err;
+    }
+
+    try {
+      fs.renameSync(staging, STATE_DIR);
+      switched = true;
+    } catch (err) {
+      if (previousMoved) {
+        try {
+          fs.renameSync(previous, STATE_DIR);
+          previousMoved = false;
+        } catch (rollbackError) {
+          console.error('backup rollback failed:', rollbackError.message);
+        }
+      }
+      throw err;
+    }
+  } catch (err) {
+    if (!switched && stagingCreated) cleanupDirectory(staging);
+    throw err;
+  }
+
+  state = prepared.state;
+  cleanupDirectory(staging);
+  if (previousMoved) cleanupDirectory(previous);
 }
 
 /* ------------------------------------------------------------------ */
@@ -485,7 +804,7 @@ async function handleApi(req, res, pathname) {
 
   /* --- auth --- */
   if (pathname === '/api/register' && method === 'POST') {
-    const body = await readJson(req);
+    const body = await readJson(req, PDF_BODY_LIMIT);
     const name = text(body.name, 80);
     const email = text(body.email, 160).toLowerCase();
     const password = typeof body.password === 'string' ? body.password : '';
@@ -497,6 +816,10 @@ async function handleApi(req, res, pathname) {
     }
     if (state.users.some((u) => u.email === email)) {
       return sendJson(res, 409, { error: 'email-exists' });
+    }
+    const presentation = presentationValues(body.presentation);
+    if (presentation.requested && isRecord(body.presentation) && body.presentation.pdf != null) {
+      presentation.pdf = savePdf(parsePdfUpload(body.presentation.pdf));
     }
     const salt = crypto.randomBytes(16).toString('hex');
     const account = {
@@ -510,7 +833,8 @@ async function handleApi(req, res, pathname) {
       country: text(body.country, 80),
       notes: text(body.notes, 500),
       role: 'member',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      presentation
     };
     state.users.push(account);
     persist();
@@ -541,10 +865,78 @@ async function handleApi(req, res, pathname) {
     return sendJson(res, 200, { user: user ? publicUser(user) : null });
   }
 
+  if (pathname === '/api/me/presentation' && method === 'PUT') {
+    if (!user) return sendJson(res, 401, { error: 'unauthorized' });
+    const body = await readJson(req, PDF_BODY_LIMIT);
+    const source = isRecord(body.presentation) ? body.presentation : {};
+    const next = presentationValues(source);
+    const previousPdf = isRecord(user.presentation) && isRecord(user.presentation.pdf)
+      ? user.presentation.pdf
+      : null;
+    let savedPdf = null;
+    try {
+      if (next.requested && source.pdf != null) savedPdf = savePdf(parsePdfUpload(source.pdf));
+      if (savedPdf || body.removePdf === true || !next.requested) deletePdf(previousPdf);
+    } catch (err) {
+      if (savedPdf) {
+        try {
+          deletePdf(savedPdf);
+        } catch {
+          // Preserve the error that prevented the update.
+        }
+      }
+      throw err;
+    }
+    next.pdf = savedPdf || (next.requested && body.removePdf !== true ? previousPdf : null);
+    user.presentation = next;
+    persist();
+    return sendJson(res, 200, { user: publicUser(user) });
+  }
+
+  const registrationPdf = /^\/api\/registrations\/([\w-]+)\/pdf$/.exec(pathname);
+  if (registrationPdf && method === 'GET') {
+    if (!user) return sendJson(res, 401, { error: 'unauthorized' });
+    const account = state.users.find((item) => item.id === registrationPdf[1]);
+    if (!account) return sendJson(res, 404, { error: 'not-found' });
+    if (user.id !== account.id && user.role !== 'admin') {
+      return sendJson(res, 403, { error: 'forbidden' });
+    }
+    const pdf = isRecord(account.presentation) ? account.presentation.pdf : null;
+    const file = isRecord(pdf) ? pdfFilePath(pdf.id) : null;
+    if (!file) return sendJson(res, 404, { error: 'not-found' });
+    let data;
+    try {
+      data = fs.readFileSync(file);
+    } catch (err) {
+      if (err && err.code === 'ENOENT') return sendJson(res, 404, { error: 'not-found' });
+      throw err;
+    }
+    res.writeHead(200, {
+      'Content-Type': 'application/pdf',
+      'Content-Length': data.length,
+      'Content-Disposition': pdfContentDisposition(pdf.name),
+      'Cache-Control': 'private, no-store',
+      'X-Content-Type-Options': 'nosniff'
+    });
+    res.end(data);
+    return;
+  }
+
   /* --- admin --- */
   if (pathname.startsWith('/api/admin/')) {
     if (!user) return sendJson(res, 401, { error: 'unauthorized' });
     if (user.role !== 'admin') return sendJson(res, 403, { error: 'forbidden' });
+
+    if (pathname === '/api/admin/backup' && method === 'GET') {
+      return sendJson(res, 200, { backup: createBackup() });
+    }
+
+    if (pathname === '/api/admin/backup' && method === 'POST') {
+      const body = await readJson(req, BACKUP_BODY_LIMIT);
+      const prepared = validateBackup(body.backup);
+      restoreBackup(prepared);
+      return sendJson(res, 200, { ok: true });
+    }
 
     if (pathname === '/api/admin/registrations' && method === 'GET') {
       const registrations = state.users
@@ -669,6 +1061,9 @@ const server = http.createServer(async (req, res) => {
     }
     if (err && err.message === 'invalid-json') {
       return sendJson(res, 400, { error: 'invalid-json' });
+    }
+    if (err && ['invalid-pdf', 'presentation-required', 'invalid-backup'].includes(err.message)) {
+      return sendJson(res, 400, { error: err.message });
     }
     console.error('request failed:', err && err.stack ? err.stack : err);
     if (!res.headersSent) sendJson(res, 500, { error: 'server-error' });
