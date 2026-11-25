@@ -15,6 +15,11 @@ const PORT = Number(process.env.PORT) || 8000;
 const HOST = '0.0.0.0';
 const APP_ROOT = __dirname;
 const PUBLIC_DIR = path.join(APP_ROOT, 'public');
+const DATABASE_URL = process.env.DATABASE_URL || '';
+const REQUIRE_DATABASE = process.env.REQUIRE_DATABASE === '1';
+const STATE_LOCK_KEY = 1952100;
+let pool = null;
+let stateRevision = 0;
 
 function findWritableStateDir() {
   const candidates = [
@@ -238,12 +243,9 @@ function seedState() {
 }
 
 let state;
-let persistTimer = null;
 
-function persist() {
-  if (persistTimer) clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => {
-    persistTimer = null;
+async function persist() {
+  if (!pool) {
     const temporaryFile = STATE_FILE + '.' + process.pid + '.' + crypto.randomUUID() + '.tmp';
     try {
       fs.mkdirSync(STATE_DIR, { recursive: true });
@@ -255,10 +257,96 @@ function persist() {
       } catch {
         // Keep the original persistence error.
       }
-      console.error('state persist failed:', err.message);
+      throw err;
     }
-  }, 200);
-  if (persistTimer.unref) persistTimer.unref();
+    return;
+  }
+
+  try {
+    const snapshot = createBackup().state;
+    const result = await pool.query(
+      `INSERT INTO tdlee100_state (id, revision, state, updated_at)
+       VALUES (1, 1, $1::jsonb, NOW())
+       ON CONFLICT (id) DO UPDATE
+       SET revision = tdlee100_state.revision + 1,
+           state = EXCLUDED.state,
+           updated_at = NOW()
+       RETURNING revision`,
+      [JSON.stringify(snapshot)]
+    );
+    stateRevision = Number(result.rows[0].revision);
+  } catch (err) {
+    stateRevision = 0;
+    throw err;
+  }
+}
+
+async function initDatabase() {
+  if (REQUIRE_DATABASE && !DATABASE_URL) throw new Error('DATABASE_URL is required');
+  if (!DATABASE_URL) return;
+  const { Pool } = require('pg');
+  pool = new Pool({ connectionString: DATABASE_URL, max: 4 });
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS tdlee100_state (
+       id SMALLINT PRIMARY KEY,
+       revision BIGINT NOT NULL,
+       state JSONB NOT NULL,
+       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+     )`
+  );
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS tdlee100_sessions (
+       token TEXT PRIMARY KEY,
+       user_id TEXT NOT NULL,
+       expires_at BIGINT NOT NULL
+     )`
+  );
+  console.log('[state] using PostgreSQL durable storage');
+}
+
+async function refreshState(force = false, client = null) {
+  if (!pool) return false;
+  const db = client || pool;
+  const current = await db.query('SELECT revision FROM tdlee100_state WHERE id = 1');
+  if (!current.rows.length) return false;
+  if (!force && Number(current.rows[0].revision) <= stateRevision) return true;
+
+  const result = await db.query('SELECT revision, state FROM tdlee100_state WHERE id = 1');
+  if (!result.rows.length) return false;
+  const row = result.rows[0];
+  const prepared = validateBackup({
+    format: 'tdlee100-backup',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    state: row.state
+  });
+  restoreBackup(prepared);
+  stateRevision = Number(row.revision);
+  return true;
+}
+
+async function beginStateRequest(req) {
+  if (!pool) return;
+  const client = await pool.connect();
+  try {
+    await client.query('SELECT pg_advisory_lock(CAST($1 AS bigint))', [STATE_LOCK_KEY]);
+    req.stateLockClient = client;
+  } catch (err) {
+    client.release();
+    throw err;
+  }
+  await refreshState(false, client);
+}
+
+async function endStateRequest(req) {
+  const client = req.stateLockClient;
+  if (!client) return;
+  req.stateLockClient = null;
+  try {
+    await client.query('SELECT pg_advisory_unlock(CAST($1 AS bigint))', [STATE_LOCK_KEY]);
+  } finally {
+    client.release();
+  }
 }
 
 function emptyPresentation() {
@@ -281,14 +369,32 @@ function hasStateShape(value) {
     Array.isArray(value.committees.hosts);
 }
 
-function loadState() {
+async function loadState() {
+  await initDatabase();
+  if (pool) {
+    const client = await pool.connect();
+    try {
+      await client.query('SELECT pg_advisory_lock(CAST($1 AS bigint))', [STATE_LOCK_KEY]);
+      if (await refreshState(true, client)) return;
+      state = seedState();
+      await persist();
+      return;
+    } finally {
+      try {
+        await client.query('SELECT pg_advisory_unlock(CAST($1 AS bigint))', [STATE_LOCK_KEY]);
+      } finally {
+        client.release();
+      }
+    }
+  }
+
   let raw;
   try {
     raw = fs.readFileSync(STATE_FILE, 'utf8');
   } catch (err) {
     if (!err || err.code !== 'ENOENT') throw err;
     state = seedState();
-    persist();
+    await persist();
     return;
   }
 
@@ -380,7 +486,7 @@ function loadState() {
     }
   }
 
-  if (migrated) persist();
+  if (migrated) await persist();
 }
 
 /* ------------------------------------------------------------------ */
@@ -418,20 +524,47 @@ function publicUser(user) {
   };
 }
 
-function createSession(userId) {
+async function createSession(userId) {
   const token = crypto.randomBytes(32).toString('hex');
-  sessions.set(token, { userId, exp: Date.now() + SESSION_TTL });
+  const exp = Date.now() + SESSION_TTL;
+  if (pool) {
+    await pool.query(
+      'INSERT INTO tdlee100_sessions (token, user_id, expires_at) VALUES ($1, $2, $3)',
+      [token, userId, exp]
+    );
+  } else {
+    sessions.set(token, { userId, exp });
+  }
   return token;
 }
 
-function currentUser(req) {
+async function destroySession(token) {
+  if (pool) {
+    await pool.query('DELETE FROM tdlee100_sessions WHERE token = $1', [token]);
+  } else {
+    sessions.delete(token);
+  }
+}
+
+async function currentUser(req) {
   const header = req.headers['authorization'] || '';
   const match = /^Bearer\s+(.+)$/i.exec(header);
   if (!match) return null;
-  const record = sessions.get(match[1]);
+  let record;
+  if (pool) {
+    const result = await pool.query(
+      'SELECT user_id, expires_at FROM tdlee100_sessions WHERE token = $1',
+      [match[1]]
+    );
+    if (result.rows.length) {
+      record = { userId: result.rows[0].user_id, exp: Number(result.rows[0].expires_at) };
+    }
+  } else {
+    record = sessions.get(match[1]);
+  }
   if (!record) return null;
   if (record.exp < Date.now()) {
-    sessions.delete(match[1]);
+    await destroySession(match[1]);
     return null;
   }
   return state.users.find((u) => u.id === record.userId) || null;
@@ -694,10 +827,6 @@ function restoreBackup(prepared) {
     }
     fs.writeFileSync(path.join(staging, 'state.json'), JSON.stringify(prepared.state), 'utf8');
 
-    if (persistTimer) {
-      clearTimeout(persistTimer);
-      persistTimer = null;
-    }
     try {
       fs.renameSync(STATE_DIR, previous);
       previousMoved = true;
@@ -795,7 +924,7 @@ function contentPayload() {
 
 async function handleApi(req, res, pathname) {
   const method = req.method;
-  const user = currentUser(req);
+  const user = await currentUser(req);
 
   /* --- public content --- */
   if (pathname === '/api/content' && method === 'GET') {
@@ -821,7 +950,7 @@ async function handleApi(req, res, pathname) {
     };
     state.forum.push(entry);
     if (state.forum.length > 500) state.forum.shift();
-    persist();
+    await persist();
     return sendJson(res, 201, { message: entry });
   }
 
@@ -860,8 +989,8 @@ async function handleApi(req, res, pathname) {
       presentation
     };
     state.users.push(account);
-    persist();
-    const token = createSession(account.id);
+    await persist();
+    const token = await createSession(account.id);
     return sendJson(res, 201, { token, user: publicUser(account) });
   }
 
@@ -873,14 +1002,14 @@ async function handleApi(req, res, pathname) {
     if (!account || !verifyPassword(password, account.salt, account.passwordHash)) {
       return sendJson(res, 401, { error: 'invalid-credentials' });
     }
-    const token = createSession(account.id);
+    const token = await createSession(account.id);
     return sendJson(res, 200, { token, user: publicUser(account) });
   }
 
   if (pathname === '/api/logout' && method === 'POST') {
     const header = req.headers['authorization'] || '';
     const match = /^Bearer\s+(.+)$/i.exec(header);
-    if (match) sessions.delete(match[1]);
+    if (match) await destroySession(match[1]);
     return sendJson(res, 200, { ok: true });
   }
 
@@ -912,7 +1041,7 @@ async function handleApi(req, res, pathname) {
     }
     next.pdf = savedPdf || (next.requested && body.removePdf !== true ? previousPdf : null);
     user.presentation = next;
-    persist();
+    await persist();
     return sendJson(res, 200, { user: publicUser(user) });
   }
 
@@ -977,6 +1106,7 @@ async function handleApi(req, res, pathname) {
       const body = await readJson(req, BACKUP_BODY_LIMIT);
       const prepared = validateBackup(body.backup);
       restoreBackup(prepared);
+      await persist();
       return sendJson(res, 200, { ok: true });
     }
 
@@ -1005,7 +1135,7 @@ async function handleApi(req, res, pathname) {
         createdAt: new Date().toISOString()
       };
       state.announcements.push(entry);
-      persist();
+      await persist();
       return sendJson(res, 201, { announcement: entry });
     }
 
@@ -1025,7 +1155,7 @@ async function handleApi(req, res, pathname) {
         createdAt: new Date().toISOString()
       };
       state.materials.push(entry);
-      persist();
+      await persist();
       return sendJson(res, 201, { material: entry });
     }
 
@@ -1047,7 +1177,7 @@ async function handleApi(req, res, pathname) {
         organizing: clean(committees.organizing),
         hosts: clean(committees.hosts)
       };
-      persist();
+      await persist();
       return sendJson(res, 200, { committees: state.committees });
     }
 
@@ -1056,7 +1186,7 @@ async function handleApi(req, res, pathname) {
       const before = state.announcements.length;
       state.announcements = state.announcements.filter((a) => a.id !== deleteAnnouncement[1]);
       if (state.announcements.length === before) return sendJson(res, 404, { error: 'not-found' });
-      persist();
+      await persist();
       return sendJson(res, 200, { ok: true });
     }
 
@@ -1065,7 +1195,7 @@ async function handleApi(req, res, pathname) {
       const before = state.materials.length;
       state.materials = state.materials.filter((m) => m.id !== deleteMaterial[1]);
       if (state.materials.length === before) return sendJson(res, 404, { error: 'not-found' });
-      persist();
+      await persist();
       return sendJson(res, 200, { ok: true });
     }
 
@@ -1079,8 +1209,6 @@ async function handleApi(req, res, pathname) {
 /* Server                                                              */
 /* ------------------------------------------------------------------ */
 
-loadState();
-
 const server = http.createServer(async (req, res) => {
   let pathname;
   try {
@@ -1093,6 +1221,7 @@ const server = http.createServer(async (req, res) => {
 
   try {
     if (pathname.startsWith('/api/')) {
+      await beginStateRequest(req);
       await handleApi(req, res, pathname);
     } else {
       serveStatic(req, res, pathname);
@@ -1109,9 +1238,23 @@ const server = http.createServer(async (req, res) => {
     }
     console.error('request failed:', err && err.stack ? err.stack : err);
     if (!res.headersSent) sendJson(res, 500, { error: 'server-error' });
+  } finally {
+    try {
+      await endStateRequest(req);
+    } catch (err) {
+      console.error('state lock release failed:', err && err.message ? err.message : err);
+    }
   }
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(`T. D. Lee Centennial site listening on http://${HOST}:${PORT}`);
+async function start() {
+  await loadState();
+  server.listen(PORT, HOST, () => {
+    console.log(`T. D. Lee Centennial site listening on http://${HOST}:${PORT}`);
+  });
+}
+
+start().catch((err) => {
+  console.error('startup failed:', err && err.stack ? err.stack : err);
+  process.exit(1);
 });
