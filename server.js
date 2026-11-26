@@ -117,17 +117,15 @@ function seedState() {
     announcements: [
       {
         id: crypto.randomUUID(),
-        date: '2026-11-25',
+        date: '2026-11-27',
         tag: 'opening',
         title: {
-          zh: '开幕报告：湍流统计理论的起源与回响',
-          en: 'Opening Lecture: Origins and Echoes of T. D. Lee’s Statistical Theory of Turbulence',
-          fr: 'Conférence inaugurale : origines et échos de la théorie statistique de la turbulence de T. D. Lee'
+          zh: '开幕报告：量子电动力学、量子色动力学与李政道',
+          en: 'Opening Lecture: QED, QCD and T. D. Lee'
         },
         body: {
-          zh: '系列首场报告将回顾李政道先生 1952 年关于流体与磁流体场统计性质的论文，讨论其对湍流统计力学、多体理论与重整化微扰展开的深远影响。',
-          en: 'The opening lecture revisits T. D. Lee’s 1952 paper on the statistical properties of hydrodynamical and magneto-hydrodynamical fields, and traces its influence on the statistical mechanics of turbulence, many-body theory and renormalized perturbation expansions.',
-          fr: 'La conférence inaugurale revient sur l’article de 1952 de T. D. Lee consacré aux propriétés statistiques des champs hydrodynamiques et magnétohydrodynamiques, et retrace son influence sur la mécanique statistique de la turbulence, la théorie des systèmes à N corps et les développements perturbatifs renormalisés.'
+          zh: '“李政道的湍流遗产——纪念李政道诞辰一百周年·湍流研究遗产系列学术报告会”，将继续于北京时间11月27日 09:00–10:00线上推进。\n\n详见“预告：开幕，讨论李政道湍流统计理论及其回响”：https://sccfis-leetdturbulencelegacy.traesite.cn/\n\nJohn V. Shebalin（乔治梅森大学）教授将带来开幕式报告，题目为：“量子电动力学、量子色动力学与李政道”。\n诚邀各位学者莅临交流。\n\n腾讯会议号：319-229-633',
+          en: 'T.D. Lee’s Legacy in Turbulence — Centenary Symposium Series on Turbulence Research in Honor of Tsung-Dao Lee\nThe next online session will be held 09:00–10:00, Beijing Time, November 27.\n\nFor details, see the announcement: Opening Session: Discussion on T.D. Lee’s Statistical Theory of Turbulence and Its Aftermath\nhttps://sccfis-leetdturbulencelegacy.traesite.cn/\n\nProf. John V. Shebalin (George Mason University) will deliver the opening talk titled QED, QCD and T.D. Lee.\nAll scholars are warmly invited to join and exchange ideas.\n\nTencent Meeting ID: 319-229-633'
         },
         createdAt: now
       },
@@ -160,34 +158,14 @@ function seedState() {
       {
         id: crypto.randomUUID(),
         date: '2026-11-25',
-        tag: 'lecture',
+        tag: 'notice',
         title: {
-          zh: 'QED 与 QCD 湍流中的统计方法——李政道 1952 年遗产',
-          en: 'Statistical Methods in QED and QCD Turbulence: The Legacy of T. D. Lee’s 1952 Paper',
-          fr: 'Méthodes statistiques dans la turbulence QED et QCD : l’héritage de l’article de 1952 de T. D. Lee',
-          ru: 'Статистические методы в турбулентности КЭД и КХД: наследие работы Т. Д. Ли 1952 года',
-          de: 'Statistische Methoden in der QED- und QCD-Turbulenz: Das Vermächtnis von T. D. Lees Arbeit von 1952',
-          it: 'Metodi statistici nella turbolenza QED e QCD: l’eredità dell’articolo di T. D. Lee del 1952',
-          es: 'Métodos estadísticos en la turbulencia QED y QCD: el legado del artículo de 1952 de T. D. Lee',
-          ko: 'QED 및 QCD 난류의 통계적 방법 — T. D. Lee 1952년 논문의 유산',
-          ja: 'QED と QCD 乱流における統計的手法——李政道 1952 年の遺産',
-          ur: 'QED اور QCD ٹربولنس میں شماریاتی طریقے: ٹی ڈی لی کے 1952 کے مقالے کا ورثہ',
-          fa: 'روش‌های آماری در تلاطم QED و QCD: میراث مقاله ۱۹۵۲ تی. دی. لی',
-          ar: 'الأساليب الإحصائية في اضطراب QED و QCD: إرث ورقة تي. دي. لي لعام 1952'
+          zh: '预告：开幕，讨论李政道湍流统计理论及展望其影响',
+          en: 'Preview: Opening Session and Discussion of T. D. Lee’s Statistical Theory of Turbulence and Its Prospective Impact'
         },
         body: {
-          zh: '1993 年关于 QED 湍流的论文引用了李政道 1952 年的工作——Dirac 方程与 Maxwell 方程耦合系统具有若干理想不变量，Lee 的统计方法为研究提供了新路径。这一思路避开了重整化微扰理论的固有困难，原则上可推广至 QCD 和夸克-胶子等离子体的统计研究。1997 年的后续论文亦隐式延续了这一方向。',
-          en: 'A 1993 paper on QED turbulence cited Lee 1952: the coupled Dirac–Maxwell system possesses several ideal invariants, and Lee’s statistical approach opens a fresh avenue of investigation. This framework sidesteps the inherent difficulties of renormalized perturbation theory and can in principle be extended to QCD and the quark–gluon plasma. A 1997 follow-up paper implicitly carried forward this direction.',
-          fr: 'Un article de 1993 sur la turbulence QED citait Lee 1952 : le système couplé Dirac–Maxwell possède plusieurs invariants idéaux, et l’approche statistique de Lee ouvre une nouvelle voie d’investigation. Ce cadre contourne les difficultés inhérentes à la théorie des perturbations renormalisée et peut en principe être étendu à la QCD et au plasma quark–gluon. Un article de suivi de 1997 a implicitement poursuivi cette direction.',
-          ru: 'Статья 1993 года о турбулентности КЭД цитировала работу Ли 1952 года: связанная система Дирака–Максвелла обладает несколькими идеальными инвариантами, а статистический подход Ли открывает новый путь исследования. Эта структура обходит присущие теории возмущений с перенормировкой трудности и в принципе может быть распространена на КХД и кварк-глюонную плазму. Последующая статья 1997 года имплицитно продолжила это направление.',
-          de: 'Ein Aufsatz von 1993 über QED-Turbulenz zitierte Lee 1952: das gekoppelte Dirac–Maxwell-System besitzt mehrere ideale Invarianten, und Lees statistischer Ansatz eröffnet einen neuen Untersuchungsweg. Dieser Rahmen umgeht die inhärenten Schwierigkeiten der renormierten Störungstheorie und lässt sich prinzipiell auf die QCD und das Quark-Gluon-Plasma erweitern. Ein Folgeaufsatz von 1997 setzte diese Richtung implizit fort.',
-          it: 'Un articolo del 1993 sulla turbolenza QED citava Lee 1952: il sistema accoppiato Dirac–Maxwell possiede diversi invarianti ideali, e l’approccio statistico di Lee apre una nuova via di indagine. Questo quadro aggira le difficoltà inerenti alla teoria delle perturbazioni rinormalizzata e può in principio essere esteso alla QCD e al plasma di quark–gluoni. Un articolo di follow-up del 1997 ha implicitamente proseguito questa direzione.',
-          es: 'Un artículo de 1993 sobre turbulencia QED citaba a Lee 1952: el sistema acoplado Dirac–Maxwell posee varios invariantes ideales, y el enfoque estadístico de Lee abre una nueva vía de investigación. Este marco evita las dificultades inherentes a la teoría de perturbaciones renormalizada y, en principio, puede extenderse a la QCD y al plasma de quark–gluones. Un artículo de seguimiento de 1997 continuó implícitamente esta dirección.',
-          ko: 'QED 난류에 관한 1993년 논문은 Lee 1952를 인용했습니다. Dirac–Maxwell 결합 시스템은 이상 불변량을 가지며 Lee의 통계적 접근법은 새로운 연구 방향을 제시합니다. 이 틀은 재규제 섭동 이론의 고유한 어려움을 피하고 원칙적으로 QCD 및 쿼크-글루온 플라즈마로 확장될 수 있습니다. 1997년 후속 논문은 이 방향을 암묵적으로 이어갔습니다.',
-          ja: 'QED 乱流に関する 1993 年の論文は Lee 1952 を引用しました。Dirac–Maxwell 結合系はいくつかの理想不変量を持ち、Lee の統計的アプローチは新しい研究経路を開きます。この枠組みは繰り込み摂動論の固有の困難さを回避し、原理的に QCD およびクォーク・グルオンプラズマに拡張できます。1997 年の追論文はこの方向を暗黙的に継承しています。',
-          ur: 'QED ٹربولنس پر 1993 کے مقالے نے Lee 1952 کو حوالہ دیا۔ جوڑا Dirac–Maxwell نظام میں کئی مثالی متغیرات ہیں، اور Lee کا شماریاتی نقطہ نظر تحقیق کا نیا راستہ کھولتا ہے۔ یہ فریم ورک renormilized perturbation theory کی اندرونی مشکلات سے بچتا ہے اور اصولی طور پر QCD اور quark–gluon plasma تک پھیلایا جا سکتا ہے۔ 1997 کے فالو اپ مقالے نے اس سمت کو واضح طور پر آگے بڑھایا۔',
-          fa: 'مقاله ۱۹۹۳ در مورد تلاطم QED به مقاله Lee ۱۹۵۲ ارجاع داد. سیستم جفت‌شده دیراک–ماکسول دارای چند متغیر ایده‌آل است و رویکرد آماری Lee مسیر جدیدی برای تحقیق می‌گشاید. این چارچوب مشکلات ذاتی نظریه اختلالات نرمالیزه‌شده را دور می‌زند و در اصل می‌تواند به QCD و پلاسماکوارک–گلئون گسترش یابد. مقاله پیگیری ۱۹۹۷ به‌طور ضمنی این جهت را ادامه داد.',
-          ar: 'استشهد مقال عام 1993 حول اضطراب QED بـ Lee 1952: يمتلك نظام Dirac–Maxwell المقترن عدة ثوابت مثالية، ويفتح نهج Lee الإحصائي طريقًا جديدًا للتحقيق. يتجنب هذا الإطار الصعوبات الكامنة في نظرية الاضطرابات المعادلة، ويمكن من حيث المبدأ توسيعه ليشمل QCD وبلازما الكوارك–الغلون. واصلت ورقة متابعة عام 1997 هذا الاتجاه ضمنيًا.'
+          zh: '由于“QED 与 QCD 湍流中的统计方法——李政道 1952 年遗产”报告者所在地的时间差和个人其他考虑，该报告推迟（暂定本周五早九点），但是我们还是决定在北京时间11月25日当日开幕（线上开始交流时间为20:30），由朱建州填补报告空缺：题目：湍流的“反者道之动”与“互补原理” 报告人：朱建州 单位：速诚基础与交叉科学研究中心（湖南宁乡/江苏南京） 摘要：李政道本人发表此系列学术报告纪念活动所围绕的的文章时，非常清楚他所获得的截断保守系统的能量均分“不是湍流”，甚至“天差地别”，但还是独具慧眼地建立了与耗散湍流之间的一些联系。这一思想技术后来被多次发展和发扬以获得湍流基础性洞见（其中部分甚至获得理论物理狄拉克奖和等离子体物理麦克斯韦奖与阿尔芬奖这些不同专业的学术承认），并还在生生不息。我将以表面上否定李政道的方式来向其致敬：他所获得的欧拉方程伽辽金截断系统能量均分场其实也是“湍流”，只不过是“非线性色散湍流”，而非耗散性湍流。更具体地说，伽辽金截断操作其实由一个非线性色散项描述，类似于传统线性色散模型（比如，Korteweg-de Vries方程），伽辽金非线性色散项与原完整对流项会达成某种平衡或协作以产生和维持特定场结构。而传统湍流耗散（如纳维-斯托克斯方程中的粘性阻尼）导致的有效截断不可避免地产生部分非线性色散，这就构成了湍流（间歇性）结构的基础，甚至一般“耗散结构”的不同视角：毁灭性耗散通过其所致色散而创生结构，这真是“反者道之动”，也让人想起波尔的“互补原理”！这些哲学式的见解可以通过解析计算截断系统所支持的非线性行波和多频率（准）周期解，以及数值观察其受（微）扰演化，而得到技术性的论证：我将给出一些经典和量子系统的具体实例，来说明这条路径的颠覆性创新篇章可能才刚刚开始。',
+          en: 'Because of the time difference at the speaker’s location and other personal considerations, the lecture “Statistical Methods in QED and QCD Turbulence: The Legacy of T. D. Lee’s 1952 Paper” has been postponed (provisionally to 09:00 this Friday). Nevertheless, the opening session will proceed online on November 25, Beijing Time, with discussion beginning at 20:30. Jian-Zhou Zhu will fill the vacant lecture slot. Title: Turbulence, “Reversal Is the Movement of the Dao,” and “Complementarity.” Speaker: Jian-Zhou Zhu. Affiliation: Sincere Center for Fundamental and Interdisciplinary Sciences (Ningxiang, Hunan / Nanjing, Jiangsu). Abstract: When T. D. Lee published the article around which this centenary lecture series is organized, he knew very well that the energy equipartition he obtained for the truncated conservative system was “not turbulence,” and was even “utterly different.” Yet he had the insight to establish connections with dissipative turbulence. This idea and technique were subsequently developed and extended many times, yielding fundamental insights into turbulence—some recognized by major distinctions in theoretical physics and plasma physics, including the Dirac, Maxwell and Alfvén honors—and the line of inquiry remains active. I will pay tribute to Lee by appearing to negate his conclusion: the equipartitioned energy field of his Galerkin-truncated Euler system is also “turbulence,” but “nonlinear dispersive turbulence,” rather than dissipative turbulence. More specifically, Galerkin truncation can be described by a nonlinear dispersive term analogous to those in classical linear dispersive models such as the Korteweg–de Vries equation. This nonlinear dispersive term balances or cooperates with the original full convection term to generate and maintain particular field structures. Effective truncation caused by conventional turbulent dissipation, such as viscous damping in the Navier–Stokes equations, inevitably produces some nonlinear dispersion, forming a basis for intermittent turbulent structures. It also offers a perspective on dissipative structures in general: destructive dissipation creates structures through the dispersion it induces. This is truly “reversal is the movement of the Dao,” and recalls Bohr’s “complementarity.” These philosophical insights can be supported technically by analytically computing nonlinear traveling waves and multifrequency quasiperiodic solutions of the truncated system, and by numerically observing their evolution under small perturbations. I will present concrete classical and quantum examples to show that a path of transformative innovation along these lines may only just be beginning.'
         },
         createdAt: now
       }
@@ -471,17 +449,6 @@ async function loadState() {
     const labelsNeedUpdate = Object.keys(SERIES_RANGE_LABELS).some((lang) => labels[lang] !== SERIES_RANGE_LABELS[lang]);
     if (labelsNeedUpdate) {
       registration.dateLabel = { ...SERIES_RANGE_LABELS };
-      migrated = true;
-    }
-  }
-
-  // Ensure the QED/QCD turbulence lecture is present
-  const qedTitleZh = 'QED 与 QCD 湍流中的统计方法——李政道 1952 年遗产';
-  if (!state.announcements.some((item) => item.title && item.title.zh === qedTitleZh)) {
-    const seeded = seedState();
-    const qed = seeded.announcements.find((item) => item.tag === 'lecture');
-    if (qed) {
-      state.announcements.push(qed);
       migrated = true;
     }
   }
